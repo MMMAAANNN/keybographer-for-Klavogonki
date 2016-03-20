@@ -58,7 +58,13 @@ Diagrams may be added also for better comprehension.
 ## Text visualization
 
 The text visualization may reflect:
+- corrections;
 - momentary speed using colors;
 - amount of keypresses required to produce the character using underline or overline (for autoreplacements);
 - potentially some kind of visualization of keypress overlaps;
 - potentially a replay function that shows keypresses on a virtual keyboard in realtime replay or accelerated/decelerated replay.
+
+# Roadmap
+
+1. Create basic functionality - record keybogram and show net speed, clean speed and typo loss on page. Form an extension that can be added to Google Chrome.
+2. Visualize text with corrections in it.
