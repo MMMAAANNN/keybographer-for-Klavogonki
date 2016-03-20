@@ -15,7 +15,7 @@ There will be different types of speed measured.
 
 *Resulting speed* or (*net speed*, or *real speed*) equals total actually accepted characters divided by total time spent for the race.
 
-*Clean speed* (also called *gross\* speed* or *brutto\* speed*) equals total actually accepted characters divided by total time spent for typing exactly those characters, i. e. excluding the time spent for making typos and correcting those typos.
+*Clean speed* (also called *gross-asterisk speed* or *brutto-asterisk speed*) equals total actually accepted characters divided by total time spent for typing exactly those characters, i. e. excluding the time spent for making typos and correcting those typos.
 
 *Raw speed* (also called *gross+* or *brutto+*) is the total actually accepted characters plus characters that were deleted plus deletion pseudocharacters (`Backspace` or `Ctrl+Backspace`) divided by total time spent for the race.
 
