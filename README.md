@@ -24,7 +24,7 @@ There will be different types of speed measured.
 
 **Raw speed** (also called *gross+* or *brutto+*) is the total actually accepted characters plus characters that were deleted plus deletion pseudocharacters (`Backspace` or `Ctrl+Backspace`) divided by total time spent for the race.
 
-**Momentary speed** is the reciprocal value of the pause between characters or strokes (i. e. momentary speed for 100 ms pause = 60 seconds/100 ms = 600 per minute).
+**Instant speed** (also called *momentary speed*) is the reciprocal value of the pause between characters or strokes (i. e. momentary speed for 100 ms pause = 60 seconds/100 ms = 600 per minute).
 
 Speed can be calculated as *cpm* (characters per minute) or *spm* (strokes per minute - where stroke is a keypress; for example, one character may require two or more keypresses, i. e. `Shift` + key, or a single keypress may yield multiple characters in case of autorpelacement usage).
 
