@@ -19,6 +19,28 @@ There will be different types of speed measured.
 
 *Raw speed* (also called *gross+* or *brutto+*) is the total actually accepted characters plus characters that were deleted plus deletion pseudocharacters (`Backspace` or `Ctrl+Backspace`) divided by total time spent for the race.
 
+*Momentary speed* is the reciprocal value of the pause between characters or strokes (i. e. momentary speed for 100 ms pause = 60 seconds/100 ms = 600 per minute).
+
 Speed can be calculated as *cpm* (characters per minute) or *spm* (strokes per minute - where stroke is a keypress; for example, one character may require two or more keypresses, i. e. `Shift` + key, or a single keypress may yield multiple characters in case of autorpelacement usage).
 
+## Corrections
 
+For corrections, the following parameters are important:
+
+*Series of corrections* is the total number of continuous usage of a backspace (or backspace with a `Ctrl` modifier, or a similar corrective method) events.
+
+*Corrected characters* is the total characters deleted during corrections.
+
+*Typo loss* is the percentage of time spent for making typos and then corecting them from the total time spent on the race.
+
+*Correction coefficient for series/characters* is the the typo loss divided by series of corrections or corrected characters.
+
+## Arrhythmia
+
+`Arrhythmia` is the measurement of speed vairability throught the race.
+
+## Retention
+
+`Retention` is the time between `onkeydown` and `onkeyup` events for a certain keypress.
+
+# Visualization
