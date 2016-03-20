@@ -55,7 +55,7 @@ The script may provide a list of keypress combos (or character combos) sorted by
 
 ### Distractions
 
-Sometimes typist can be distracted from typing the race, e. g. if an imortant conversation or telephone call occurs. This can potentially be noted by checking for very long pauses and reported accordingly.
+Sometimes typist can be distracted from typing the race, e. g. if an imortant conversation or telephone call occurs. This can potentially be noted by checking for very long pauses and reported accordingly. Also loss of focus may help reporting distractions.
 
 ## Visualization
 
