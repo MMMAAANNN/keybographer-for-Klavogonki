@@ -3,7 +3,8 @@ A userscript to record, analyze and visualize a keybogram (keypress sequence) in
 
 ## Recording
 
-A **keybogam** is a sequence of keyboard events with timing, recorded since the start of the race. `performance.now()` is used for timing.
+**Keybogam** is a sequence of keyboard events with timing, recorded since the start of the race.
+- `performance.now()` is used for timing.
 - The most important keyboard event to be recorded is  `onkeydown`.
 - The `onkeyup` is also needed, but much less important (mostly for additional parameters calculation).
 - For each printable keypress (i.e. the keypress that leads to input change), the simulataneous `Shift`, `Alt` and `Ctrl` status must also be watched.
