@@ -44,3 +44,17 @@ For corrections, the following parameters are important:
 `Retention` is the time between `onkeydown` and `onkeyup` events for a certain keypress.
 
 # Visualization
+
+## Parameter visualization
+
+Tabular view - a table of some sort that shows the parameters calculated in the analysis stage.
+
+Diagrams may be added also for better comprehension.
+
+## Text visualization
+
+The text visualization may reflect:
+- momentary speed using colors;
+- amount of keypresses required to produce the character using underline or overline (for autoreplacements);
+- potentially some kind of visualization of keypress overlaps;
+- potentially a replay function that shows keypresses on a virtual keyboard in realtime replay or accelerated/decelerated replay.
