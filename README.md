@@ -43,6 +43,10 @@ For corrections, the following parameters are important:
 
 `Retention` is the time between `onkeydown` and `onkeyup` events for a certain keypress.
 
+## Slow and fast words or keypress combos
+
+The script may provide a list of keypress combos (or character combos) sorted by their speed and a similar product for words (i. e. character combos separated by spaces).
+
 # Visualization
 
 ## Parameter visualization
