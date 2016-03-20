@@ -3,7 +3,12 @@ A userscript to record, analyze and visualize a keybogram (keypress sequence) in
 
 ## Recording
 
-A **keybogam** is a sequence of keyboard events with timing, recorded since the start of the race. `performance.now()` is used for timing. The most important keyboard event to be recorded is  `onkeydown`. The `onkeyup` is also needed, but much less important (mostly for additional parameters calculation). For each printable keypress (i.e. the keypress that leads to input change), the simulataneous `Shift`, `Alt` and `Ctrl` status must also be watched. In addition to keyboard events, with each event the inputfield state must be recorded to show how the keyboard event affects it. It is also a good idea to record focus loss events `blur` to make sure we know when the typing is impossible because of some distraction.
+A **keybogam** is a sequence of keyboard events with timing, recorded since the start of the race. `performance.now()` is used for timing.
+- The most important keyboard event to be recorded is  `onkeydown`.
+- The `onkeyup` is also needed, but much less important (mostly for additional parameters calculation).
+- For each printable keypress (i.e. the keypress that leads to input change), the simulataneous `Shift`, `Alt` and `Ctrl` status must also be watched.
+- In addition to keyboard events, with each event the inputfield state must be recorded to show how the keyboard event affects it.
+- It is also a good idea to record focus loss events `blur` to make sure we know when the typing is impossible because of some distraction.
 
 ## Analysis
 
@@ -46,6 +51,10 @@ For corrections, the following parameters are important:
 ### Slow and fast words or keypress combos
 
 The script may provide a list of keypress combos (or character combos) sorted by their speed and a similar product for words (i. e. character combos separated by spaces).
+
+### Distractions
+
+Sometimes typist can be distracted from typing the race, e. g. if an imortant conversation or telephone call occurs. This can potentially be noted by checking for very long pauses and reported accordingly.
 
 ## Visualization
 
