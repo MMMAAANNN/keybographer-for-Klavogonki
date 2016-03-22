@@ -1,24 +1,18 @@
 // ==UserScript==
 // @name Keybographer for Klavogonki
+// @namespace   klavogonki
 // @description A script to record, analyze and present the keybogarm of a Klavogonki race.
 // @author MMMAAANNN
 // @license 
 // @version 
-// @include http://klavogonki.ru/g/?gmid=*
+// @include http://klavogonki.ru/g/*
+// @run-at      document-end
+// ==/UserScript==
 
-(function (window, undefined) {
-    var w;
-    if (typeof unsafeWindow != undefined) {
-        w = unsafeWindow
-    } else {
-        w = window;
-    }
-    if (w.self != w.top) {
-        return;
-    }
-    // [4] дополнительная проверка наряду с @include
-    if (/http:\/\/klavogonki.ru\/g\//.test(w.location.href)) {
-        //Ниже идёт непосредственно код скрипта
-        alert("Test of basic userscript template.");
-    }
-})(window);
+function keybographer() {
+    document.onkeydown = function(ev) {console.log(ev.code, pefromance.now())}
+}
+
+var script = document.createElement("script");
+script.innerHTML = "(" + keybographer + ")()";
+document.body.appendChild(script);
