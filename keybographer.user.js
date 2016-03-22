@@ -15,11 +15,11 @@ document.body.appendChild(keybogramShower);
 
 var keyboAnalysis = document.createElement('div');
 keyboAnalysis.setAttribute('id', 'keyboAnalysis');
-keyboAnalysis.innerHTML = 'Analysis';
+keyboAnalysis.innerHTML = '<b>Analysis</b>';
 keybogramShower.appendChild(keyboAnalysis);
 
 var keyboDetail = document.createElement('div');
-keyboDetail.innerHTML = 'Keybogram Details';
+keyboDetail.innerHTML = '<b>Detailed Keybogram</b>';
 keybogramShower.appendChild(keyboDetail);
 
 var keyboTable = document.createElement('table');
@@ -66,10 +66,29 @@ function keybographer() {
     	var keypresses = keybogram.filter(function(event) {
     		return event[5] === "keypress"
     	});
-    	var totalTime = keydowns[keydowns.length - 1][7] - keypresses[0][7];
+
+    	// This is not exactly the clean speed (as in brutto* or gross* in TypingStatistics).
+    	// This simplified method does not account for cases where backspace or control-backspace
+    	// deletes normal, non-erratic fragments of the text.
+    	var totalTime = keypresses[keypresses.length - 1][7] - keypresses[0][7];
+    	var errorTime = 0;
+    	for (var eventCounter = 1; eventCounter < keydowns.length; eventCounter++) {
+    		if (keydowns[eventCounter][2] === 'ERROR!' && keydowns[eventCounter - 1][2] != 'ERROR!') {
+    			errorTime -= parseFloat(keydowns[eventCounter - 1][7]);
+    			console.log(errorTime);
+    		}
+    		if (keydowns[eventCounter][2] != 'ERROR!' && keydowns[eventCounter - 1][2] === 'ERROR!') {
+    			errorTime += parseFloat(keydowns[eventCounter - 1][7]);
+    			console.log(errorTime);
+    		}
+    	}
+
     	var netSpeed = 60000 * game.text.length / totalTime;
-    	
-    	report = 'NetSpeed: ' + netSpeed.toFixed(2) + '<br/>';
+    	var cleanSpeed = 60000 * game.text.length / (totalTime - errorTime);
+
+    	report = 'Net speed: ' + netSpeed.toFixed(2) + '<br/>';
+    	report += 'Error time: ' + errorTime.toFixed(2) + '<br/>';
+    	report += 'Clean speed: ' + cleanSpeed.toFixed(2) + '<br/>';
 
 		var analysis = document.createElement('div');
 		analysis.innerHTML = report;
