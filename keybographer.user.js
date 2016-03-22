@@ -10,8 +10,11 @@
 // ==/UserScript==
 
 function keybographer() {
-    
-    $("inputtext").onkeydown =  function(ev) {console.log(ev.code, performance.now())};
+    var keybogram = [];
+    document.onkeydown =  function(ev) {
+        keybogram.push(ev.code, performance.now());
+        $('footer') = keybogram;
+    };
 }
 
 var script = document.createElement("script");
