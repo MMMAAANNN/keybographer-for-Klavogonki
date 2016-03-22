@@ -1,0 +1,14 @@
+{
+    "background_page" : "background.html", 
+    "content_scripts" : [
+        {
+            "js":[ "keybographer.user.js" ], 
+            "matches":[ "http://klavogonki.ru/g/?gmid=*" ], 
+            "run_at":"document_end"  
+        }
+    ], 
+    "description" : "", 
+    "name" : "Keybographer", 
+    "permissions" : [ "http://klavogonki.ru/*", "unlimitedStorage"],
+    "version" : "0.001"
+}
