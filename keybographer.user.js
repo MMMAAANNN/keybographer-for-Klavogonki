@@ -10,7 +10,7 @@
 // ==/UserScript==
 
 function keybographer() {
-    document.onkeydown = function(ev) {console.log(ev.code, pefromance.now())}
+    document.onkeydown = function(ev) {console.log(ev.code, peformance.now())}
 }
 
 var script = document.createElement("script");
