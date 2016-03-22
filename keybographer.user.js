@@ -11,7 +11,7 @@
 
 function keybographer() {
     
-    document.getElementById("inputtext").addEventListener('onkeydown', function(ev) {console.log(ev.code, performance.now())});
+    $("inputtext").onkeydown =  function(ev) {console.log(ev.code, performance.now())};
 }
 
 var script = document.createElement("script");
