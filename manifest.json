@@ -10,6 +10,6 @@
     "description" : "", 
     "name" : "Keybographer", 
     "permissions" : [ "http://klavogonki.ru/*", "unlimitedStorage"],
-    "version" : "0.001"
+    "version" : "0.001",
     "manifest_version" : 2
 }
