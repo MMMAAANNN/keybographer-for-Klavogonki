@@ -4,7 +4,7 @@
 // @description A script to record, analyze and present the keybogarm of a Klavogonki race.
 // @author MMMAAANNN
 // @license 
-// @version 
+// @version 0.0.3.1
 // @include http://klavogonki.ru/g/*
 // @run-at      document-end
 // ==/UserScript==
@@ -69,12 +69,12 @@ function keybographer() {
     	// This simplified method does not account for cases where backspace or control-backspace
     	// deletes normal, non-erratic fragments of the text ("overcorrection time").
     	var errorTime = 0;
-    	for (var eventCounter = 1; eventCounter < keydowns.length; eventCounter++) {
-    		if (keydowns[eventCounter].game.error && !keydowns[eventCounter - 1].game.error) {
-    			errorTime -= keydowns[eventCounter - 1].timeStamp;
+    	for (var eventCounter = 1; eventCounter < keypresses.length; eventCounter++) {
+    		if (keypresses[eventCounter].game.error && !keypresses[eventCounter - 1].game.error) {
+    			errorTime -= keypresses[eventCounter - 1].timeStamp;
     		}
-    		if (!keydowns[eventCounter].game.error && keydowns[eventCounter - 1].game.error) {
-    			errorTime += keydowns[eventCounter - 1].timeStamp;
+    		if (!keypresses[eventCounter].game.error && keypresses[eventCounter - 1].game.error) {
+    			errorTime += keypresses[eventCounter - 1].timeStamp;
     		}
     	}
 
@@ -96,13 +96,25 @@ function keybographer() {
 		
 		// Showing detailed keybogram
 		tableHeader = document.createElement('tr');
-		tableHeader.innerHTML = '<th>Type</th><th>Code</th><th>Time</th><th>Error state</th><th>Result in inputtext</th>';
+		tableHeader.innerHTML = '<th>Type</th>' + 
+								'<th>Code</th>' + 
+								'<th>Shift</th>' + 
+								'<th>Ctrl</th>' + 
+								'<th>Alt</th>' + 
+								'<th>Time</th>' + 
+								'<th>Pause</th>' +
+								'<th>Error state</th>' + 
+								'<th>Result in inputtext</th>';
 		document.getElementById('keyboTable').appendChild(tableHeader);
 		for (var k = 0; k < keybogram.length; k++) {
 			var ev = keybogram[k];
 			var line = [ ev.type,
 						 ev.code,
+						 ev.shiftKey ? 'Shift' : '',
+						 ev.ctrlKey  ? 'Ctrl'  : '',
+						 ev.altKey   ? 'Alt'   : '',
 						(ev.timeStamp - keybogram[0].timeStamp + game.lag).toFixed(3),
+						k ? (ev.timeStamp - keybogram[k-1].timeStamp).toFixed(3) : game.lag,
 						 ev.game.error ? "ERROR" : " ",
 						 ev.game.input]
 	        printLine = document.createElement('tr');
