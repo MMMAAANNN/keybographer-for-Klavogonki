@@ -84,6 +84,7 @@ The text visualization may reflect:
 ## Roadmap
 
 1. Create basic functionality - record keybogram and show net speed, clean speed and typo loss on page. Form an extension that can be added to Google Chrome.
-2. Visualize text with corrections in it.
-3. Add and visualize parameters one by one.
-4. Provide virtual keyboard and replay functionality.
+2. Provide export of the recorded keybogram.
+3. Visualize text with corrections in it.
+4. Add and visualize parameters one by one.
+5. Provide virtual keyboard and replay functionality.
