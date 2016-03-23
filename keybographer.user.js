@@ -78,12 +78,14 @@ function keybographer() {
     		}
     	}
 
+    	// Here the game.text.length is not quite correct.
+    	// For "Безошибочный", the number of typed characters may be less than than that.
         var netSpeed = 60000 * game.text.length / totalTime;
         var cleanSpeed = 60000 * game.text.length / (totalTime - errorTime);
 
     	report  = 'Start lag: '     + game.lag                      + ' ms<br/>';
-        report += 'Total time: '    + (totalTime/1000).toFixed(3)   + ' ms<br/>';
-    	report += 'Error time: '    + (errorTime/1000).toFixed(3)   + ' ms<br/>';
+        report += 'Total time: '    + (totalTime/1000).toFixed(3)   + ' s<br/>';
+    	report += 'Error time: '    + (errorTime/1000).toFixed(3)   + ' s<br/>';
     	report += 'Net speed: '     + netSpeed.toFixed(2)           + ' cpm<br/>';
     	report += 'Clean speed: '   + cleanSpeed.toFixed(2)         + ' cpm<br/>';
     	report += 'Text length: '   + game.text.length              + ' characters<br/>';
