@@ -2,13 +2,13 @@
     "content_scripts" : [
         {
             "js":[ "keybographer.user.js" ], 
-            "matches":[ "http://klavogonki.ru/g/?gmid=*" ], 
+            "matches":[ "http://klavogonki.ru/g/*" ], 
             "run_at":"document_end"  
         }
     ], 
-    "description" : "", 
+    "description" : "This extension records, analyzes and visualizes the keybogram - a sequence of typing events", 
     "name" : "Keybographer", 
     "permissions" : [ "http://klavogonki.ru/*", "unlimitedStorage"],
-    "version" : "0.001",
+    "version" : "0.002",
     "manifest_version" : 2
 }

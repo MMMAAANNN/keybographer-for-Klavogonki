@@ -84,8 +84,8 @@ function keybographer() {
     	report += 'Net speed: '     + netSpeed.toFixed(2)    + ' cpm<br/>';
     	report += 'Error time: '    + errorTime.toFixed(2)   + ' ms<br/>';
     	report += 'Clean speed: '   + cleanSpeed.toFixed(2)  + ' cpm<br/>';
-    	report += keydowns.length                            + ' keydowns <br/>';
-    	report += keypresses.length                          + ' keypresses <br/>';
+    	report += 'No. of keydowns: ' + keydowns.length      + ' events<br/>';
+    	report += 'No. of keypresses: ' + keypresses.length  + ' events<br/>';
 
 		var analysis = document.createElement('div');
 		analysis.innerHTML = report;
