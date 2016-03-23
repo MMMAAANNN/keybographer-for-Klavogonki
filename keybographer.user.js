@@ -80,10 +80,10 @@ function keybographer() {
         var netSpeed = 60000 * game.text.length / totalTime;
         var cleanSpeed = 60000 * game.text.length / (totalTime - errorTime);
 
-    	report  = 'Lag: '           + game.lag               + '<br/>';
-    	report += 'Net speed: '     + netSpeed.toFixed(2)    + '<br/>';
-    	report += 'Error time: '    + errorTime.toFixed(2)   + '<br/>';
-    	report += 'Clean speed: '   + cleanSpeed.toFixed(2)  + '<br/>';
+    	report  = 'Lag: '           + game.lag               + ' ms<br/>';
+    	report += 'Net speed: '     + netSpeed.toFixed(2)    + ' cpm<br/>';
+    	report += 'Error time: '    + errorTime.toFixed(2)   + ' ms<br/>';
+    	report += 'Clean speed: '   + cleanSpeed.toFixed(2)  + ' cpm<br/>';
 
 		var analysis = document.createElement('div');
 		analysis.innerHTML = report;
