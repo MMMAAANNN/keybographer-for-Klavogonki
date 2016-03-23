@@ -28,7 +28,7 @@ keyboTable.setAttribute('border', '1px');
 keybogramShower.appendChild(keyboTable);
 
 function keybographer() {
-	var keybogram = [];
+    var keybogram = [];
     var finish = false;
     eventRecorder = function(event) {
     	if (keybogram.length === 0) {
@@ -36,14 +36,14 @@ function keybographer() {
     	}
     	if (game.gamestatus === 'racing' && !finish) {
 	        event.game = {
-        					status: game.gamestatus,
-    			   			error:  game.error,
-    			   			input:  document.getElementById('inputtext').value
-        			    };
-            keybogram.push(event);
-	    }
-	    if (finish != game.finished) { analyze(); }
-	    finish = game.finished;
+                                status: game.gamestatus,
+                                error:  game.error,
+                                input:  document.getElementById('inputtext').value
+                             };
+                keybogram.push(event);
+        }
+        if (finish != game.finished) { analyze(); }
+        finish = game.finished;
     }
     document.onkeydown = eventRecorder;
     document.onkeypress = eventRecorder;
@@ -58,12 +58,15 @@ function keybographer() {
     	var keypresses = keybogram.filter(function(y) {
     		return y.type === "keypress";
     	});
-
+        
+        // This is the totalTime algorithm used in TypingStatistics.
+        // It does not account for preceding keydown of a Shift. This is why 'keypresses' are used.
     	var totalTime = keypresses[keypresses.length - 1].timeStamp - keypresses[0].timeStamp;
 
-    	// This is not exactly the clean speed (as in brutto* or gross* in TypingStatistics).
+    	// This is not the full time needed for the clean speed
+    	// (as in brutto* or gross* in TypingStatistics).
     	// This simplified method does not account for cases where backspace or control-backspace
-    	// deletes normal, non-erratic fragments of the text.
+    	// deletes normal, non-erratic fragments of the text ("overcorrection time").
     	var errorTime = 0;
     	for (var eventCounter = 1; eventCounter < keydowns.length; eventCounter++) {
     		if (keydowns[eventCounter].game.error && !keydowns[eventCounter - 1].game.error) {
@@ -74,13 +77,13 @@ function keybographer() {
     		}
     	}
 
-    	var netSpeed = 60000 * game.text.length / totalTime;
-		var cleanSpeed = 60000 * game.text.length / (totalTime - errorTime);
+        var netSpeed = 60000 * game.text.length / totalTime;
+        var cleanSpeed = 60000 * game.text.length / (totalTime - errorTime);
 
-    	report  = 'Lag: '		 + game.lag + '<br/>';
-    	report += 'Net speed: '  + netSpeed.toFixed(2) + '<br/>';
-    	report += 'Error time: ' + errorTime.toFixed(2) + '<br/>';
-    	report += 'Clean speed: ' + cleanSpeed.toFixed(2) + '<br/>';
+    	report  = 'Lag: '           + game.lag               + '<br/>';
+    	report += 'Net speed: '     + netSpeed.toFixed(2)    + '<br/>';
+    	report += 'Error time: '    + errorTime.toFixed(2)   + '<br/>';
+    	report += 'Clean speed: '   + cleanSpeed.toFixed(2)  + '<br/>';
 
 		var analysis = document.createElement('div');
 		analysis.innerHTML = report;
@@ -89,11 +92,11 @@ function keybographer() {
 		// Showing detailed keybogram
 		for (var k = 0; k < keybogram.length; k++) {
 			var ev = keybogram[k];
-			var line = [ev.type,
-						ev.code,
+			var line = [ ev.type,
+						 ev.code,
 						(ev.timeStamp - keybogram[0].timeStamp + game.lag).toFixed(3),
-						ev.game.error ? "ERROR" : " ",
-						ev.game.input]
+						 ev.game.error ? "ERROR" : " ",
+						 ev.game.input]
 	        printLine = document.createElement('tr');
 	        for (var i = 0; i < line.length; i++) {
 	        	printCell = document.createElement('td');
