@@ -80,18 +80,23 @@ function keybographer() {
         var netSpeed = 60000 * game.text.length / totalTime;
         var cleanSpeed = 60000 * game.text.length / (totalTime - errorTime);
 
-    	report  = 'Lag: '           + game.lag               + ' ms<br/>';
-    	report += 'Net speed: '     + netSpeed.toFixed(2)    + ' cpm<br/>';
-    	report += 'Error time: '    + errorTime.toFixed(2)   + ' ms<br/>';
-    	report += 'Clean speed: '   + cleanSpeed.toFixed(2)  + ' cpm<br/>';
-    	report += 'No. of keydowns: ' + keydowns.length      + ' events<br/>';
-    	report += 'No. of keypresses: ' + keypresses.length  + ' events<br/>';
+    	report  = 'Start lag: '     + game.lag                      + ' ms<br/>';
+        report += 'Total time: '    + (totalTime/1000).toFixed(3)   + ' ms<br/>';
+    	report += 'Error time: '    + (errorTime/1000).toFixed(3)   + ' ms<br/>';
+    	report += 'Net speed: '     + netSpeed.toFixed(2)           + ' cpm<br/>';
+    	report += 'Clean speed: '   + cleanSpeed.toFixed(2)         + ' cpm<br/>';
+    	report += 'Text length: '   + game.text.length              + ' characters<br/>';
+    	report += 'No. of keydowns: ' + keydowns.length             + ' events<br/>';
+    	report += 'No. of keypresses: ' + keypresses.length         + ' events<br/>';
 
 		var analysis = document.createElement('div');
 		analysis.innerHTML = report;
 		document.getElementById('keyboAnalysis').appendChild(analysis);
 		
 		// Showing detailed keybogram
+		tableHeader = document.createElement('tr');
+		tableHeader.innerHTML = '<th>Type</th><th>Code</th><th>Time</th><th>Error state</th><th>Result in inputtext</th>';
+		document.getElementById('keyboTable').appendChild(tableHeader);
 		for (var k = 0; k < keybogram.length; k++) {
 			var ev = keybogram[k];
 			var line = [ ev.type,
