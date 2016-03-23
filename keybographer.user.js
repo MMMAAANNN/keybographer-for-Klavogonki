@@ -15,7 +15,7 @@ document.body.appendChild(keybogramShower);
 
 var keyboAnalysis = document.createElement('div');
 keyboAnalysis.setAttribute('id', 'keyboAnalysis');
-keyboAnalysis.innerHTML = '<b>Analysis</b>';
+keyboAnalysis.innerHTML = '<b>Keybogram Analysis</b>';
 keybogramShower.appendChild(keyboAnalysis);
 
 var keyboDetail = document.createElement('div');
@@ -28,6 +28,7 @@ keyboTable.setAttribute('border', '1px');
 keybogramShower.appendChild(keyboTable);
 
 function keybographer() {
+  setTimeout(function() {
     var keybogram = [];
     var finish = false;
     eventRecorder = function(event) {
@@ -51,12 +52,12 @@ function keybographer() {
 
     function analyze() {
     	game.keybogram = keybogram;
-    	var keydowns = keybogram.filter(function(x) {
-    		return x.type === "keydown";
+    	var keydowns = keybogram.filter(function(downSeeker) {
+    		return downSeeker.type === "keydown";
     	});
 
-    	var keypresses = keybogram.filter(function(y) {
-    		return y.type === "keypress";
+    	var keypresses = keybogram.filter(function(pressSeeker) {
+    		return pressSeeker.type === "keypress";
     	});
         
         // This is the totalTime algorithm used in TypingStatistics.
@@ -105,6 +106,15 @@ function keybographer() {
 						 ev.game.error ? "ERROR" : " ",
 						 ev.game.input]
 	        printLine = document.createElement('tr');
+	        if (ev.type === 'keyup') {
+	        	printLine.setAttribute('style', 'color: #cccccc');
+	        }
+	        if (ev.type === 'keydown') {
+	        	printLine.setAttribute('style', 'color: #666999');
+	        }
+	        if (ev.game.error) {
+	        	printLine.setAttribute('style', 'background: #ff9999');
+	        }
 	        for (var i = 0; i < line.length; i++) {
 	        	printCell = document.createElement('td');
 	        	printCell.innerHTML = line[i];
@@ -113,6 +123,7 @@ function keybographer() {
         	document.getElementById('keyboTable').appendChild(printLine);
     	}
     }
+  }, 100);
 }
 
 var script = document.createElement("script");
