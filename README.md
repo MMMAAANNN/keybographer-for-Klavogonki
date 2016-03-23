@@ -74,6 +74,13 @@ The text visualization may reflect:
 - potentially some kind of visualization of keypress overlaps;
 - potentially a replay function that shows keypresses on a virtual keyboard in realtime replay or accelerated/decelerated replay.
 
+## Export
+- Export to `.tsf` ([Typing Statistics](fil.urikor.net)) format to ensure analysis.
+- Export of certain tables to CSV.
+- Export to JSON.
+- Saving to a cloud.
+- Publishing to user's log in Klavogonki (especially attached to the "best result" publication).
+
 ## Roadmap
 
 1. Create basic functionality - record keybogram and show net speed, clean speed and typo loss on page. Form an extension that can be added to Google Chrome.
