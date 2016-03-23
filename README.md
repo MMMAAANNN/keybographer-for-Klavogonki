@@ -75,7 +75,7 @@ The text visualization may reflect:
 - potentially a replay function that shows keypresses on a virtual keyboard in realtime replay or accelerated/decelerated replay.
 
 ## Export
-- Export to `.tsf` ([Typing Statistics](fil.urikor.net)) format to ensure analysis.
+- Export to `.tsf` ([Typing Statistics](http://fil.urikor.net)) format to ensure analysis.
 - Export of certain tables to CSV.
 - Export to JSON.
 - Saving to a cloud.
