@@ -4,11 +4,10 @@
 // @description A script to record, analyze and present the keybogarm of a Klavogonki race.
 // @author MMMAAANNN
 // @license 
-// @version 0.0.4.0
+// @version 0.0.4.1
 // @include http://klavogonki.ru/g/*
 // @run-at      document-end
 // ==/UserScript==
-console.log(performance.now(), 'Keybographer extension starts here!');
 
 var keybogramShower = document.createElement('div');
 keybogramShower.setAttribute('id', 'keybogramShower');
@@ -29,10 +28,7 @@ keyboTable.setAttribute('border', '1px');
 keybogramShower.appendChild(keyboTable);
 
 function keybographer() {
-  setTimeout(function() {
-  	console.log(performance.now(), 'Keybographer function starts here!');
-  	console.log(document);
-  	inputWatcher = document.getElementById('inputtext');
+  	var watchedTarget = document.getElementById('inputtext');
     var keybogram = [];
     var finish = false;
     eventRecorder = function(event) {
@@ -43,21 +39,24 @@ function keybographer() {
 	        event.game = {
                                 status: game.gamestatus,
                                 error:  game.error,
-                                input:  document.getElementById('inputtext').value
+                                inputStatus:  document.getElementById('inputtext').value
                              };
                 keybogram.push(event);
         }
         if (finish != game.finished) { analyze(); }
         finish = game.finished;
+        if (!(keybogram.length % 300)) console.log(keybogram);
     }
-    inputWatcher.addEventListener('keydown', eventRecorder, true);
-    inputWatcher.addEventListener('keypress', eventRecorder, true);
-    inputWatcher.addEventListener('keyup', eventRecorder, true);
-    inputWatcher.addEventListener('blur', eventRecorder, true);
-    inputWatcher.addEventListener('focus', eventRecorder, true);
+    watchedTarget.addEventListener('keydown', eventRecorder, true);
+    watchedTarget.addEventListener('keypress', eventRecorder, true);
+    watchedTarget.addEventListener('keyup', eventRecorder, true);
+    watchedTarget.addEventListener('blur', eventRecorder, true);
+    watchedTarget.addEventListener('focus', eventRecorder, true);
 
     function analyze() {
     	game.keybogram = keybogram;
+
+
     	var keydowns = keybogram.filter(function(downSeeker) {
     		return downSeeker.type === "keydown";
     	});
@@ -93,8 +92,9 @@ function keybographer() {
     	report += 'Error time: '    + (errorTime/1000).toFixed(3)   + ' s<br/>';
     	report += 'Net speed: '     + netSpeed.toFixed(2)           + ' cpm<br/>';
     	report += 'Clean speed: '   + cleanSpeed.toFixed(2)         + ' cpm<br/>';
-    	report += 'Text length: '   + typedTextLength              + ' characters<br/>';
-    	report += 'No. of keydowns: ' + keydowns.length             + ' events<br/>';
+    	report += 'Typed text length: ' + typedTextLength           + ' characters<br/>';
+    	report += 'Full text length: '  + game.text.length          + ' characters<br/>';
+    	report += 'No. of keydowns: '   + keydowns.length           + ' events<br/>';
     	report += 'No. of keypresses: ' + keypresses.length         + ' events<br/>';
 
 		var analysis = document.createElement('div');
@@ -120,10 +120,10 @@ function keybographer() {
 						 ev.shiftKey ? 'Shift' : '',
 						 ev.ctrlKey  ? 'Ctrl'  : '',
 						 ev.altKey   ? 'Alt'   : '',
-						(ev.timeStamp - keybogram[0].timeStamp + game.lag).toFixed(3),
-						k ? (ev.timeStamp - keybogram[k-1].timeStamp).toFixed(3) : game.lag,
+						(ev.timeStamp - keybogram[1].timeStamp + game.lag).toFixed(3),
+						k ? (ev.timeStamp - keybogram[k-1].timeStamp).toFixed(3) : 'N/A',
 						 ev.game.error ? "ERROR" : " ",
-						 ev.game.input]
+						 ev.game.inputStatus]
 	        printLine = document.createElement('tr');
 	        if (ev.type === 'keyup') {
 	        	printLine.setAttribute('style', 'color: #cccccc');
@@ -142,7 +142,6 @@ function keybographer() {
         	document.getElementById('keyboTable').appendChild(printLine);
     	}
     }
-  }, 500);
 }
 
 var script = document.createElement("script");
