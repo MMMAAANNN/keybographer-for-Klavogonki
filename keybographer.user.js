@@ -4,10 +4,11 @@
 // @description A script to record, analyze and present the keybogarm of a Klavogonki race.
 // @author MMMAAANNN
 // @license 
-// @version 0.0.3.1
+// @version 0.0.4.0
 // @include http://klavogonki.ru/g/*
 // @run-at      document-end
 // ==/UserScript==
+console.log(performance.now(), 'Keybographer extension starts here!');
 
 var keybogramShower = document.createElement('div');
 keybogramShower.setAttribute('id', 'keybogramShower');
@@ -29,10 +30,13 @@ keybogramShower.appendChild(keyboTable);
 
 function keybographer() {
   setTimeout(function() {
+  	console.log(performance.now(), 'Keybographer function starts here!');
+  	console.log(document);
+  	inputWatcher = document.getElementById('inputtext');
     var keybogram = [];
     var finish = false;
     eventRecorder = function(event) {
-    	if (keybogram.length === 0) {
+    	if (keybogram.length === 1) {
     		game.lag = (new Date).getTime() - game.begintime;
     	}
     	if (game.gamestatus === 'racing' && !finish) {
@@ -46,9 +50,11 @@ function keybographer() {
         if (finish != game.finished) { analyze(); }
         finish = game.finished;
     }
-    document.onkeydown = eventRecorder;
-    document.onkeypress = eventRecorder;
-    document.onkeyup = eventRecorder;
+    inputWatcher.addEventListener('keydown', eventRecorder, true);
+    inputWatcher.addEventListener('keypress', eventRecorder, true);
+    inputWatcher.addEventListener('keyup', eventRecorder, true);
+    inputWatcher.addEventListener('blur', eventRecorder, true);
+    inputWatcher.addEventListener('focus', eventRecorder, true);
 
     function analyze() {
     	game.keybogram = keybogram;
@@ -78,17 +84,16 @@ function keybographer() {
     		}
     	}
 
-    	// Here the game.text.length is not quite correct.
-    	// For "Безошибочный", the number of typed characters may be less than than that.
-        var netSpeed = 60000 * game.text.length / totalTime;
-        var cleanSpeed = 60000 * game.text.length / (totalTime - errorTime);
+    	var typedTextLength = game.input_words.join(' ').replace(/\s+/g, ' ').length + game.last_correct_char + 1;
+        var netSpeed = 60000 * typedTextLength / totalTime;
+        var cleanSpeed = 60000 * typedTextLength / (totalTime - errorTime);
 
     	report  = 'Start lag: '     + game.lag                      + ' ms<br/>';
         report += 'Total time: '    + (totalTime/1000).toFixed(3)   + ' s<br/>';
     	report += 'Error time: '    + (errorTime/1000).toFixed(3)   + ' s<br/>';
     	report += 'Net speed: '     + netSpeed.toFixed(2)           + ' cpm<br/>';
     	report += 'Clean speed: '   + cleanSpeed.toFixed(2)         + ' cpm<br/>';
-    	report += 'Text length: '   + game.text.length              + ' characters<br/>';
+    	report += 'Text length: '   + typedTextLength              + ' characters<br/>';
     	report += 'No. of keydowns: ' + keydowns.length             + ' events<br/>';
     	report += 'No. of keypresses: ' + keypresses.length         + ' events<br/>';
 
@@ -137,7 +142,7 @@ function keybographer() {
         	document.getElementById('keyboTable').appendChild(printLine);
     	}
     }
-  }, 100);
+  }, 500);
 }
 
 var script = document.createElement("script");
