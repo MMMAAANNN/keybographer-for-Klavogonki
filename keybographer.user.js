@@ -4,7 +4,7 @@
 // @description A script to record, analyze and present the keybogarm of a Klavogonki race.
 // @author MMMAAANNN
 // @license 
-// @version 0.0.5.0
+// @version 0.0.5.2
 // @include http://klavogonki.ru/g/*
 // @run-at      document-end
 // ==/UserScript==
@@ -60,7 +60,7 @@ function keybographer() {
     	for (var eventCounter = 0; eventCounter < keybogram.length; eventCounter++) {
     		var currentEvent = keybogram[eventCounter];
     		if (currentEvent.code === 'Backspace' && currentEvent.type === 'keydown') {
-    			var backwardsSeeker = eventCounter;
+    			var backwardsSeeker = eventCounter - 1;
     			var deletedChars = '';
     			while (backwardsSeeker > -1) {
     				if (keybogram[backwardsSeeker + 1].game.inputStatus === '') {
@@ -115,18 +115,30 @@ function keybographer() {
     		}
     	}
 
+    	// This was a fast formula and it is wrong.
+    	// We also need to account for time spent on pressing backspaces.
     	var correctionLossTime = 0;
-
+    	for (var eventCounter = 1; eventCounter < keypresses.length; eventCounter++) {
+    		if (keypresses[eventCounter].isDeleted && !keypresses[eventCounter - 1].isDeleted) {
+    			correctionLossTime -= keypresses[eventCounter].timeStamp;
+    		}
+    		if (!keypresses[eventCounter].isDeleted && keypresses[eventCounter - 1].isDeleted) {
+    			correctionLossTime += keypresses[eventCounter].timeStamp;
+    		}
+    	}
 
     	var typedTextLength = game.input_words.join(' ').replace(/\s+/g, ' ').length + game.last_correct_char + 1;
         var netSpeed = 60000 * typedTextLength / totalTime;
-        var cleanSpeed = 60000 * typedTextLength / (totalTime - errorTime);
+        var cleanSpeed = 60000 * typedTextLength / (totalTime - correctionLossTime);
 
-    	report  = 'Start lag: '     + game.lag                      + ' ms<br/>';
-        report += 'Total time: '    + (totalTime/1000).toFixed(3)   + ' s<br/>';
-    	report += 'Error time: '    + (errorTime/1000).toFixed(3)   + ' s<br/>';
-    	report += 'Net speed: '     + netSpeed.toFixed(2)           + ' cpm<br/>';
-    	report += 'Clean speed: '   + cleanSpeed.toFixed(2)         + ' cpm<br/>';
+
+        // Showing report
+    	report  = 'Start lag: '       + game.lag                               + ' ms<br/>';
+        report += 'Total time: '      + (totalTime/1000).toFixed(3)            + ' s<br/>';
+    	report += 'Correction loss: ' + (correctionLossTime/1000).toFixed(3)   + ' s<br/>';
+    	report += 'Error time: '      + (errorTime/1000).toFixed(3)            + ' s<br/>';
+		report += 'Net speed: '       + netSpeed.toFixed(2)                    + ' cpm<br/>';
+    	report += 'Clean speed: '     + cleanSpeed.toFixed(2)                  + ' cpm<br/>';
     	report += 'Typed text length: ' + typedTextLength           + ' characters<br/>';
     	report += 'Full text length: '  + game.text.length          + ' characters<br/>';
     	report += 'No. of keydowns: '   + keydowns.length           + ' events<br/>';
@@ -138,7 +150,8 @@ function keybographer() {
 		
 		// Showing detailed keybogram
 		tableHeader = document.createElement('tr');
-		tableHeader.innerHTML = '<th>Type</th>' + 
+		tableHeader.innerHTML = '<th>Index</th>' + 
+								'<th>Type</th>' + 
 								'<th>Key</th>' + 								
 								'<th>Code</th>' +
 								'<th>Char</th>' +
@@ -153,7 +166,8 @@ function keybographer() {
 		document.getElementById('keyboTable').appendChild(tableHeader);
 		for (var k = 0; k < keybogram.length; k++) {
 			var ev = keybogram[k];
-			var line = [ ev.type,
+			var line = [ k,
+						 ev.type,
 						 ev.code,
 						 ev.charCode,
 						 ev.charCode === 32 ? '[ ]' : String.fromCharCode(ev.charCode),
@@ -164,7 +178,7 @@ function keybographer() {
 						k ? (ev.timeStamp - keybogram[k-1].timeStamp).toFixed(3) : 'N/A',
 						 ev.game.error ? "ERROR" : " ",
 						 ev.isDeleted ? 'DELETED' : '',
-						 ev.game.inputStatus]
+						 ev.game.inputStatus.replace(' ', '&middot;')]
 	        var printLine = document.createElement('tr');
 	        var style = '';
 	        if (ev.type === 'keyup') {
