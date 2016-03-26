@@ -4,7 +4,7 @@
 // @description A script to record, analyze and present the keybogarm of a Klavogonki race.
 // @author MMMAAANNN
 // @license 
-// @version 0.0.4.1
+// @version 0.0.5.0
 // @include http://klavogonki.ru/g/*
 // @run-at      document-end
 // ==/UserScript==
@@ -41,8 +41,10 @@ function keybographer() {
                                 error:  game.error,
                                 inputStatus:  document.getElementById('inputtext').value
                              };
-                keybogram.push(event);
+            event.isDeleted = false;
+            keybogram.push(event);
         }
+
         if (finish != game.finished) { analyze(); }
         finish = game.finished;
         if (!(keybogram.length % 300)) console.log(keybogram);
@@ -54,8 +56,38 @@ function keybographer() {
     watchedTarget.addEventListener('focus', eventRecorder, true);
 
     function analyze() {
-    	game.keybogram = keybogram;
+    	// Backspace and Control-Backspace markup
+    	for (var eventCounter = 0; eventCounter < keybogram.length; eventCounter++) {
+    		var currentEvent = keybogram[eventCounter];
+    		if (currentEvent.code === 'Backspace' && currentEvent.type === 'keydown') {
+    			var backwardsSeeker = eventCounter;
+    			var deletedChars = '';
+    			while (backwardsSeeker > -1) {
+    				if (keybogram[backwardsSeeker + 1].game.inputStatus === '') {
+    					console.log(backwardsSeeker, 'Input field empty, cannot delete backwards no more!')
+    					break;
+    				}
+    				if ( keybogram[backwardsSeeker].type === 'keypress' &&
+    					!keybogram[backwardsSeeker].isDeleted) {
+    					deletedChars = String.fromCharCode(keybogram[backwardsSeeker].charCode) + deletedChars;
+    					if (currentEvent.ctrlKey) {
+    						console.log(backwardsSeeker, deletedChars);
+    						if (deletedChars.match(/[^a-zA-Zа-яА-ЯёЁ][a-zA-Zа-яА-ЯёЁ]/)) {
+    							break;
+    						} else {
+    							keybogram[backwardsSeeker].isDeleted = true;
+    						}
+    					} else {
+    						keybogram[backwardsSeeker].isDeleted = true;
+    						break;
+    					}
+    				}
+    				backwardsSeeker--;
+    			}
+    		}
+    	}
 
+    	game.keybogram = keybogram;
 
     	var keydowns = keybogram.filter(function(downSeeker) {
     		return downSeeker.type === "keydown";
@@ -64,7 +96,7 @@ function keybographer() {
     	var keypresses = keybogram.filter(function(pressSeeker) {
     		return pressSeeker.type === "keypress";
     	});
-        
+
         // This is the totalTime algorithm used in TypingStatistics.
         // It does not account for preceding keydown of a Shift. This is why 'keypresses' are used.
     	var totalTime = keypresses[keypresses.length - 1].timeStamp - keypresses[0].timeStamp;
@@ -82,6 +114,9 @@ function keybographer() {
     			errorTime += keypresses[eventCounter - 1].timeStamp;
     		}
     	}
+
+    	var correctionLossTime = 0;
+
 
     	var typedTextLength = game.input_words.join(' ').replace(/\s+/g, ' ').length + game.last_correct_char + 1;
         var netSpeed = 60000 * typedTextLength / totalTime;
@@ -104,36 +139,47 @@ function keybographer() {
 		// Showing detailed keybogram
 		tableHeader = document.createElement('tr');
 		tableHeader.innerHTML = '<th>Type</th>' + 
-								'<th>Code</th>' + 
+								'<th>Key</th>' + 								
+								'<th>Code</th>' +
+								'<th>Char</th>' +
 								'<th>Shift</th>' + 
 								'<th>Ctrl</th>' + 
 								'<th>Alt</th>' + 
 								'<th>Time</th>' + 
 								'<th>Pause</th>' +
 								'<th>Error state</th>' + 
+								'<th>Deleted?</th>' + 
 								'<th>Result in inputtext</th>';
 		document.getElementById('keyboTable').appendChild(tableHeader);
 		for (var k = 0; k < keybogram.length; k++) {
 			var ev = keybogram[k];
 			var line = [ ev.type,
 						 ev.code,
+						 ev.charCode,
+						 ev.charCode === 32 ? '[ ]' : String.fromCharCode(ev.charCode),
 						 ev.shiftKey ? 'Shift' : '',
 						 ev.ctrlKey  ? 'Ctrl'  : '',
 						 ev.altKey   ? 'Alt'   : '',
 						(ev.timeStamp - keybogram[1].timeStamp + game.lag).toFixed(3),
 						k ? (ev.timeStamp - keybogram[k-1].timeStamp).toFixed(3) : 'N/A',
 						 ev.game.error ? "ERROR" : " ",
+						 ev.isDeleted ? 'DELETED' : '',
 						 ev.game.inputStatus]
-	        printLine = document.createElement('tr');
+	        var printLine = document.createElement('tr');
+	        var style = '';
 	        if (ev.type === 'keyup') {
-	        	printLine.setAttribute('style', 'color: #cccccc');
+	        	style = 'color: #cccccc;';
 	        }
 	        if (ev.type === 'keydown') {
-	        	printLine.setAttribute('style', 'color: #666999');
+	        	style = 'color: #666999;';
+	        }
+	        if (ev.isDeleted) {
+	        	style = 'color: #ff3333;';
 	        }
 	        if (ev.game.error) {
-	        	printLine.setAttribute('style', 'background: #ff9999');
+	        	style += ' background: #ff9999';
 	        }
+	        printLine.setAttribute('style', style);
 	        for (var i = 0; i < line.length; i++) {
 	        	printCell = document.createElement('td');
 	        	printCell.innerHTML = line[i];
