@@ -4,18 +4,18 @@
 // @description A script to record, analyze and present the keybogarm of a Klavogonki race.
 // @author MMMAAANNN
 // @license 
-// @version 0.0.6.0
+// @version 0.0.6.1
 // @include http://klavogonki.ru/g/*
 // @run-at      document-end
 // ==/UserScript==
 
 var keybogramShower = document.createElement('div');
-keybogramShower.setAttribute('id', 'keybogramShower');
+keybogramShower.id = 'keybogramShower';
 document.getElementById('status-block').appendChild(keybogramShower);
 
 var cleanSpeedIndicator = document.createElement('div');
 cleanSpeedIndicator.innerHTML = 'Кейбографер запущен';
-cleanSpeedIndicator.setAttribute('id', 'cleanSpeedIndicator');
+cleanSpeedIndicator.id = 'cleanSpeedIndicator';
 keybogramShower.appendChild(cleanSpeedIndicator);
 
 var keyboAnalysis = document.createElement('div');
@@ -31,7 +31,7 @@ keyboDetail.innerHTML = '<b>Detailed Keybogram</b>';
 keybogramShower.appendChild(keyboDetail);
 
 var keyboTable = document.createElement('table');
-keyboTable.setAttribute('id', 'keyboTable');
+keyboTable.id = 'keyboTable';
 keyboTable.setAttribute('border', '1px');
 keyboDetail.appendChild(keyboTable);
 
@@ -166,19 +166,22 @@ function keybographer() {
         						 (totalTime - correctionLossTime);
 
         // Show clean speed at a visible spot
-        var showKeybogram = "'" + 'document.getElementById("keyboDetail").style.display = "block";' + "'";
-        var showAnalysis = "'" + 'document.getElementById("keyboAnalysis").style.display = "block";' + "'";
-        cleanSpeedIndicator.innerHTML = 'Чистовая скорость: <b style="size: xx-bigger">' +
-        						cleanSpeed.toFixed(2) + '</b> зн./мин&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' +
-        						'<button onclick=' + showAnalysis + '>Анализ кейбограммы</button> ' +
-        						'<button onclick=' + showKeybogram + '>Подробная кейбограмма</button><br/>';
+		var toggleAnalysis = function() {
+			$('keyboAnalysis').style.display = $('keyboAnalysis').style.display === 'none' ? 'block' : 'none';
+		}
+		var toggleKeyboDetail = function() {
+			$('keyboDetail').style.display = $('keyboDetail').style.display === 'none' ? 'block' : 'none';
+		}
+		cleanSpeedIndicator.innerHTML = "Чистовая скорость: <b>" + cleanSpeed.toFixed(2) + '</b> зн./мин&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' +
+			'<button id = "keyboAnalysisButton" onclick="(' + toggleAnalysis + ')()">Анализ кейбограммы</button> ' +
+			'<button id = "keyboDetailButton" onclick="(' + toggleKeyboDetail + ')()">Подробная кейбограмма</button><br/>';
 
 
         // Showing report
     	report  = 'Start lag: '       + game.lag                               + ' ms<br/>';
         report += 'Total time: '      + (totalTime/1000).toFixed(3)            + ' s<br/>';
     	report += 'Correction loss: ' + (correctionLossTime/1000).toFixed(3)   + ' s<br/>';
-    	report += 'Series of correctons:' + correctionSeriesCounter			   + '<br/>';
+    	report += 'Series of correctons: ' + correctionSeriesCounter		   + '<br/>';
     	report += 'Error time: '      + (errorTime/1000).toFixed(3)            + ' s<br/>';
 		report += 'Net speed: '       + netSpeed.toFixed(2)                    + ' cpm<br/>';
     	report += 'Clean speed: <b>'  + cleanSpeed.toFixed(2)                  + '</b> cpm<br/>';
@@ -236,7 +239,7 @@ function keybographer() {
 	        if (ev.game.error) {
 	        	style += ' background: #ff9999';
 	        }
-	        printLine.setAttribute('style', style);
+	        printLine.style = style;
 	        for (var i = 0; i < line.length; i++) {
 	        	printCell = document.createElement('td');
 	        	printCell.innerHTML = line[i];
