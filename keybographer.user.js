@@ -4,28 +4,36 @@
 // @description A script to record, analyze and present the keybogarm of a Klavogonki race.
 // @author MMMAAANNN
 // @license 
-// @version 0.0.5.2
+// @version 0.0.6.0
 // @include http://klavogonki.ru/g/*
 // @run-at      document-end
 // ==/UserScript==
 
 var keybogramShower = document.createElement('div');
 keybogramShower.setAttribute('id', 'keybogramShower');
-document.body.appendChild(keybogramShower);
+document.getElementById('status-block').appendChild(keybogramShower);
+
+var cleanSpeedIndicator = document.createElement('div');
+cleanSpeedIndicator.innerHTML = 'Кейбографер запущен';
+cleanSpeedIndicator.setAttribute('id', 'cleanSpeedIndicator');
+keybogramShower.appendChild(cleanSpeedIndicator);
 
 var keyboAnalysis = document.createElement('div');
-keyboAnalysis.setAttribute('id', 'keyboAnalysis');
+keyboAnalysis.id = 'keyboAnalysis';
+keyboAnalysis.style.display = 'none';
 keyboAnalysis.innerHTML = '<b>Keybogram Analysis</b>';
 keybogramShower.appendChild(keyboAnalysis);
 
 var keyboDetail = document.createElement('div');
+keyboDetail.id = 'keyboDetail';
+keyboDetail.style.display = 'none';
 keyboDetail.innerHTML = '<b>Detailed Keybogram</b>';
 keybogramShower.appendChild(keyboDetail);
 
 var keyboTable = document.createElement('table');
 keyboTable.setAttribute('id', 'keyboTable');
 keyboTable.setAttribute('border', '1px');
-keybogramShower.appendChild(keyboTable);
+keyboDetail.appendChild(keyboTable);
 
 function keybographer() {
   	var watchedTarget = document.getElementById('inputtext');
@@ -87,6 +95,7 @@ function keybographer() {
     		}
     	}
 
+    	// To be used for debug
     	game.keybogram = keybogram;
 
     	var keydowns = keybogram.filter(function(downSeeker) {
@@ -101,10 +110,7 @@ function keybographer() {
         // It does not account for preceding keydown of a Shift. This is why 'keypresses' are used.
     	var totalTime = keypresses[keypresses.length - 1].timeStamp - keypresses[0].timeStamp;
 
-    	// This is not the full time needed for the clean speed
-    	// (as in brutto* or gross* in TypingStatistics).
-    	// This simplified method does not account for cases where backspace or control-backspace
-    	// deletes normal, non-erratic fragments of the text ("overcorrection time").
+    	// This is buggy, needs attention.
     	var errorTime = 0;
     	for (var eventCounter = 1; eventCounter < keypresses.length; eventCounter++) {
     		if (keypresses[eventCounter].game.error && !keypresses[eventCounter - 1].game.error) {
@@ -115,30 +121,67 @@ function keybographer() {
     		}
     	}
 
-    	// This was a fast formula and it is wrong.
-    	// We also need to account for time spent on pressing backspaces.
+    	// This is exactly how brutto* is calculated in Typing Statistics.
+    	// It completely removes everything related to the correction,
+    	// including the normal keypress preceding it (probably because the pause after it is not representative).
     	var correctionLossTime = 0;
-    	for (var eventCounter = 1; eventCounter < keypresses.length; eventCounter++) {
-    		if (keypresses[eventCounter].isDeleted && !keypresses[eventCounter - 1].isDeleted) {
-    			correctionLossTime -= keypresses[eventCounter].timeStamp;
+    	var correctionSeriesCounter = 0;
+    	for (var eventCounter = 0; eventCounter < keypresses.length; eventCounter++) {
+    		var thisDeleted = keypresses[eventCounter].isDeleted;
+    		var previousDeleted;
+    		if (eventCounter === 0) {
+    			previousDeleted = false;
+    		} else {
+    			previousDeleted = keypresses[eventCounter - 1].isDeleted;
     		}
-    		if (!keypresses[eventCounter].isDeleted && keypresses[eventCounter - 1].isDeleted) {
+    		if (thisDeleted && !previousDeleted) {
+    			correctionLossTime -= keypresses[eventCounter].timeStamp;
+    			if (eventCounter > 0) {
+    				correctionLossTime += keypresses[eventCounter].timeStamp - keypresses[eventCounter-1].timeStamp;
+    			}
+    			console.log('Detected start of a correction at keypress no.', eventCounter,
+    						'Timestamp:', keypresses[eventCounter].timeStamp,
+    						'Current sum of correction loss:', (correctionLossTime/1000).toFixed(3));
+    			correctionSeriesCounter++;
+    		}
+    		if (!thisDeleted && previousDeleted) {
     			correctionLossTime += keypresses[eventCounter].timeStamp;
+	    		console.log('Detected end of a correction at keypress no.', eventCounter,
+							'Timestamp:', keypresses[eventCounter].timeStamp,
+							'Current sum of correction loss:', (correctionLossTime/1000).toFixed(3));
+    		}keypresses[eventCounter].isDeleted;
+    		var previousDeleted;
+    		if (eventCounter === 0) {
+    			previousDeleted = false;
+    		} else if (keypresses[eventCounter - 1].isDeleted) {
+    			previousDeleted = true;
+    		} else {
+    			previousDeleted = false;
     		}
     	}
 
     	var typedTextLength = game.input_words.join(' ').replace(/\s+/g, ' ').length + game.last_correct_char + 1;
         var netSpeed = 60000 * typedTextLength / totalTime;
-        var cleanSpeed = 60000 * typedTextLength / (totalTime - correctionLossTime);
+        var cleanSpeed = 60000 * (typedTextLength - correctionSeriesCounter) /
+        						 (totalTime - correctionLossTime);
+
+        // Show clean speed at a visible spot
+        var showKeybogram = "'" + 'document.getElementById("keyboDetail").style.display = "block";' + "'";
+        var showAnalysis = "'" + 'document.getElementById("keyboAnalysis").style.display = "block";' + "'";
+        cleanSpeedIndicator.innerHTML = 'Чистовая скорость: <b style="size: xx-bigger">' +
+        						cleanSpeed.toFixed(2) + '</b> зн./мин&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' +
+        						'<button onclick=' + showAnalysis + '>Анализ кейбограммы</button> ' +
+        						'<button onclick=' + showKeybogram + '>Подробная кейбограмма</button><br/>';
 
 
         // Showing report
     	report  = 'Start lag: '       + game.lag                               + ' ms<br/>';
         report += 'Total time: '      + (totalTime/1000).toFixed(3)            + ' s<br/>';
     	report += 'Correction loss: ' + (correctionLossTime/1000).toFixed(3)   + ' s<br/>';
+    	report += 'Series of correctons:' + correctionSeriesCounter			   + '<br/>';
     	report += 'Error time: '      + (errorTime/1000).toFixed(3)            + ' s<br/>';
 		report += 'Net speed: '       + netSpeed.toFixed(2)                    + ' cpm<br/>';
-    	report += 'Clean speed: '     + cleanSpeed.toFixed(2)                  + ' cpm<br/>';
+    	report += 'Clean speed: <b>'  + cleanSpeed.toFixed(2)                  + '</b> cpm<br/>';
     	report += 'Typed text length: ' + typedTextLength           + ' characters<br/>';
     	report += 'Full text length: '  + game.text.length          + ' characters<br/>';
     	report += 'No. of keydowns: '   + keydowns.length           + ' events<br/>';
