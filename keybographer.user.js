@@ -4,7 +4,7 @@
 // @description A script to record, analyze and present the keybogarm of a Klavogonki race.
 // @author MMMAAANNN
 // @license 
-// @version 0.0.6.1
+// @version 0.0.6.2
 // @include http://klavogonki.ru/g/*
 // @run-at      document-end
 // ==/UserScript==
@@ -36,12 +36,12 @@ keyboTable.setAttribute('border', '1px');
 keyboDetail.appendChild(keyboTable);
 
 function keybographer() {
-  	var watchedTarget = document.getElementById('inputtext');
+    var watchedTarget = document.getElementById('inputtext');
     var keybogram = [];
     var finish = false;
     eventRecorder = function(event) {
-    	if (keybogram.length === 1) {
-    		game.lag = (new Date).getTime() - game.begintime;
+        if (keybogram.length === 1) {
+            game.lag = (new Date).getTime() - game.begintime;
     	}
     	if (game.gamestatus === 'racing' && !finish) {
 	        event.game = {
@@ -123,7 +123,8 @@ function keybographer() {
 
     	// This is exactly how brutto* is calculated in Typing Statistics.
     	// It completely removes everything related to the correction,
-    	// including the normal keypress preceding it (probably because the pause after it is not representative).
+    	// including the normal keypress preceding it
+    	// (probably because the pause after it is not representative).
     	var correctionLossTime = 0;
     	var correctionSeriesCounter = 0;
     	for (var eventCounter = 0; eventCounter < keypresses.length; eventCounter++) {
