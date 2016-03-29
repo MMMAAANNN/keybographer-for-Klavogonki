@@ -4,7 +4,7 @@
 // @description A script to record, analyze and present the keybogarm of a Klavogonki race.
 // @author MMMAAANNN
 // @license 
-// @version 0.0.7.0
+// @version 0.0.7.1
 // @include http://klavogonki.ru/g/*
 // @run-at      document-end
 // ==/UserScript==
@@ -38,6 +38,7 @@ function main() {
             keyboTable.setAttribute('border', '1px');
             keyboDetail.appendChild(keyboTable);
 
+            game.lag = false;
             this.record();
         },
 
@@ -63,7 +64,7 @@ function main() {
         
         eventRecorder: function(event) {
             Keybographer.status('Recording event no. ' + (Keybographer.keybogram.length + 1));
-            if (Keybographer.keybogram.length === 1) {
+            if (event.type === 'keypress' && !game.lag) {
                 game.lag = (new Date).getTime() - game.begintime;
         	}
 	        event.game = {
@@ -71,12 +72,44 @@ function main() {
                                 error:  game.error,
                                 inputStatus:  document.getElementById('inputtext').value
                              };
+            // Backspace and Control-Backspace markup.
+            // Known issue: does not handle situations like "b.8" well for Ctrl+BS.
+            // Known issue: any characters outside standard Russian and English charsets.
             event.isDeleted = false;
+            if (event.code === 'Backspace' && event.type === 'keydown') {
+                var backwardsSeeker = Keybographer.keybogram.length - 2;
+                var deletedChars = '';
+                while (backwardsSeeker > -1) {
+                    if (Keybographer.keybogram[backwardsSeeker + 1].game.inputStatus === '') {
+                        console.log('Klavogonki-specific behaviour at', backwardsSeeker,
+                                    '- Input field empty, cannot delete backwards no more!');
+                        break;
+                    }
+                    if (Keybographer.keybogram[backwardsSeeker].type === 'keypress' &&
+                        !Keybographer.keybogram[backwardsSeeker].isDeleted) {
+                        deletedChars = String.fromCharCode(Keybographer.keybogram[backwardsSeeker].charCode) + deletedChars[0];
+                        if (event.ctrlKey) {
+                            if (deletedChars.match(/[^a-zA-Zа-яА-ЯёЁ0-9][a-zA-Zа-яА-ЯёЁ0-9]/) &&
+                                !deletedChars.match(/[\.\,][0-9]/)) {
+                                break;
+                            } else {
+                                Keybographer.keybogram[backwardsSeeker].isDeleted = true;
+                            }
+                        } else {
+                            Keybographer.keybogram[backwardsSeeker].isDeleted = true;
+                            break;
+                        }
+                    }
+                    backwardsSeeker--;
+                }
+            }
             Keybographer.keybogram.push(event);
             Keybographer.status('Recorded event no. ' +
                                 (Keybographer.keybogram.length) + ": " +
                                 event.type + ' ' +
                                 (['focus', 'blur'].indexOf(event.type) === -1 ? event.code : ''));
+
+
         },
 
 
@@ -88,47 +121,17 @@ function main() {
                 var analysis = document.createElement('div');
                 analysis.innerHTML = "<b>Final analysis</b>";
                 document.getElementById('keyboAnalysis').appendChild(analysis);
-            } else if (game.gamestatus === 'racing' && interimReports) {
+                Keybographer.report();
+            } else if (game.gamestatus === 'racing' && Keybographer.interimReports) {
                 Keybographer.status('Interim analysis started');
                 var analysis = document.createElement('div');
                 analysis.innerHTML = "<b>Interim analysis</b>";
                 document.getElementById('keyboAnalysis').appendChild(analysis);
+                Keybographer.report();
             }
-            Keybographer.report();
         },
 
         report: function(){
-        	// Backspace and Control-Backspace markup
-        	for (var eventCounter = 0; eventCounter < Keybographer.keybogram.length; eventCounter++) {
-        		var currentEvent = Keybographer.keybogram[eventCounter];
-        		if (currentEvent.code === 'Backspace' && currentEvent.type === 'keydown') {
-        			var backwardsSeeker = eventCounter - 1;
-        			var deletedChars = '';
-        			while (backwardsSeeker > -1) {
-        				if (Keybographer.keybogram[backwardsSeeker + 1].game.inputStatus === '') {
-        					console.log(backwardsSeeker, 'Input field empty, cannot delete backwards no more!')
-        					break;
-        				}
-        				if ( Keybographer.keybogram[backwardsSeeker].type === 'keypress' &&
-        					!Keybographer.keybogram[backwardsSeeker].isDeleted) {
-        					deletedChars = String.fromCharCode(Keybographer.keybogram[backwardsSeeker].charCode) + deletedChars;
-        					if (currentEvent.ctrlKey) {
-        						console.log(backwardsSeeker, deletedChars);
-        						if (deletedChars.match(/[^a-zA-Zа-яА-ЯёЁ][a-zA-Zа-яА-ЯёЁ]/)) {
-        							break;
-        						} else {
-        							Keybographer.keybogram[backwardsSeeker].isDeleted = true;
-        						}
-        					} else {
-        						Keybographer.keybogram[backwardsSeeker].isDeleted = true;
-        						break;
-        					}
-        				}
-        				backwardsSeeker--;
-        			}
-        		}
-        	}
-
         	var keydowns = Keybographer.keybogram.filter(function(downSeeker) {
         		return downSeeker.type === "keydown";
         	});
@@ -143,12 +146,12 @@ function main() {
 
         	// This is buggy, needs attention.
         	var errorTime = 0;
-        	for (var eventCounter = 1; eventCounter < keypresses.length; eventCounter++) {
-        		if (keypresses[eventCounter].game.error && !keypresses[eventCounter - 1].game.error) {
-        			errorTime -= keypresses[eventCounter - 1].timeStamp;
+        	for (var eventCounter = 1; eventCounter < Keybographer.keybogram.length; eventCounter++) {
+        		if (Keybographer.keybogram[eventCounter].game.error && !Keybographer.keybogram[eventCounter - 1].game.error) {
+        			errorTime -= Keybographer.keybogram[eventCounter - 1].timeStamp;
         		}
-        		if (!keypresses[eventCounter].game.error && keypresses[eventCounter - 1].game.error) {
-        			errorTime += keypresses[eventCounter - 1].timeStamp;
+        		if (!Keybographer.keybogram[eventCounter].game.error && Keybographer.keybogram[eventCounter - 1].game.error) {
+        			errorTime += Keybographer.keybogram[eventCounter - 1].timeStamp;
         		}
         	}
 
