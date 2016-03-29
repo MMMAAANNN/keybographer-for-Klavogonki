@@ -4,7 +4,7 @@
 // @description A script to record, analyze and present the keybogarm of a Klavogonki race.
 // @author MMMAAANNN
 // @license 
-// @version 0.0.7.4
+// @version 0.0.7.5
 // @include http://klavogonki.ru/g/*
 // @run-at      document-end
 // ==/UserScript==
@@ -88,10 +88,11 @@ function mainK() {
                     }
                     if (Keybographer.keybogram[backwardsSeeker].type === 'keypress' &&
                         !Keybographer.keybogram[backwardsSeeker].isDeleted) {
-                        deletedChars = String.fromCharCode(Keybographer.keybogram[backwardsSeeker].charCode) + deletedChars[0];
+                        deletedChars = String.fromCharCode(Keybographer.keybogram[backwardsSeeker].charCode)
+                                        + deletedChars;
+                        console.log(Keybographer.keybogram.length-1, backwardsSeeker, deletedChars);
                         if (event.ctrlKey) {
-                            if (deletedChars.match(/[^a-zA-Zа-яА-ЯёЁ0-9][a-zA-Zа-яА-ЯёЁ0-9]/) &&
-                                !deletedChars.match(/[\.\,][0-9]/)) {
+                            if (deletedChars.match(/[^a-zA-Zа-яА-ЯёЁ0-9][a-zA-Zа-яА-ЯёЁ0-9]/)) {
                                 break;
                             } else {
                                 Keybographer.keybogram[backwardsSeeker].isDeleted = true;
@@ -130,10 +131,16 @@ function mainK() {
         },
 
         analyze: function() {
+            // A part of what is now in 'Keybographer.report()' must be moved up here,
+            // with the result as an object containing multiple calculated parameters.
             Keybographer.report();
         },
 
         report: function(){
+            // A big part of this bloated function must be moved to .analyze().
+            // This function will ultimately only receive the paramenters and
+            // present them in an easily readable way to the user, without any calculations.
+
         	var keydowns = Keybographer.keybogram.filter(function(downSeeker) {
         		return downSeeker.type === "keydown";
         	});
@@ -274,9 +281,15 @@ function mainK() {
     	        if (ev.isDeleted) {
     	        	style = 'color: #ff3333;';
     	        }
-    	        if (ev.game.error) {
-    	        	style += ' background: #ff9999';
-    	        }
+                if (ev.game.error) {
+                    style += ' background: #ff9999';
+                }
+                if (ev.code === 'Backspace' && ev.type === 'keydown') {
+                    style = 'background: #cccccc;';
+                    if (ev.ctrlKey) {
+                        style = 'background: #999999;';
+                    }
+                }
     	        printLine.style = style;
     	        for (var i = 0; i < line.length; i++) {
     	        	printCell = document.createElement('td');
