@@ -4,20 +4,31 @@
 // @description A script to record, analyze and present the keybogarm of a Klavogonki race.
 // @author MMMAAANNN
 // @license 
-// @version 0.0.7.1
+// @version 0.0.7.2
 // @include http://klavogonki.ru/g/*
 // @run-at      document-end
 // ==/UserScript==
 
-function main() {
+function mainK() {
     Keybographer = {    
+
+        keybogram: [],
+
+        watchedTarget: document.getElementById('inputtext'),
+
+        interimReports: 0,
+
+        status: function(message){
+            document.getElementById('keybographerStatus').innerHTML = message;
+        },
+
         initialize: function (){
             var keybogramShower = document.createElement('div');
             keybogramShower.id = 'keybogramShower';
             document.getElementById('status-block').appendChild(keybogramShower);
 
             var keybographerStatus = document.createElement('div');
-            keybographerStatus.innerHTML = 'Кейбографер запущен';
+            keybographerStatus.innerHTML = 'Keybographer status line initialized.';
             keybographerStatus.id = 'keybographerStatus';
             keybogramShower.appendChild(keybographerStatus);
 
@@ -42,26 +53,16 @@ function main() {
             this.record();
         },
 
-        record: function() {
+        record: function () {
             this.status('Keybographer is waiting for the start of the race...');
             this.watchedTarget.addEventListener('keydown', this.eventRecorder, true);
             this.watchedTarget.addEventListener('keypress', this.eventRecorder, true);
             this.watchedTarget.addEventListener('keyup', this.eventRecorder, true);
             this.watchedTarget.addEventListener('focus', this.eventRecorder, true);
             this.watchedTarget.addEventListener('blur', this.eventRecorder, true);
-            this.timer = setInterval(Keybographer.analyze, 500);
+            this.timer = setInterval(Keybographer.initiateAnalysis, 500);
         },
 
-        interimReports: 0,
-
-        keybogram: [],
-
-        status: function(message){
-            document.getElementById('keybographerStatus').innerHTML = message;
-        },
-
-        watchedTarget: document.getElementById('inputtext'),
-        
         eventRecorder: function(event) {
             Keybographer.status('Recording event no. ' + (Keybographer.keybogram.length + 1));
             if (event.type === 'keypress' && !game.lag) {
@@ -108,12 +109,9 @@ function main() {
                                 (Keybographer.keybogram.length) + ": " +
                                 event.type + ' ' +
                                 (['focus', 'blur'].indexOf(event.type) === -1 ? event.code : ''));
-
-
         },
 
-
-        analyze: function () {
+        initiateAnalysis: function () {
             if (game.finished) {
                 clearInterval(Keybographer.timer);
                 console.log('Repetitive analysis timer (id', Keybographer.timer, ')stopped.');
@@ -121,14 +119,18 @@ function main() {
                 var analysis = document.createElement('div');
                 analysis.innerHTML = "<b>Final analysis</b>";
                 document.getElementById('keyboAnalysis').appendChild(analysis);
-                Keybographer.report();
+                Keybographer.analyze();
             } else if (game.gamestatus === 'racing' && Keybographer.interimReports) {
                 Keybographer.status('Interim analysis started');
                 var analysis = document.createElement('div');
                 analysis.innerHTML = "<b>Interim analysis</b>";
                 document.getElementById('keyboAnalysis').appendChild(analysis);
-                Keybographer.report();
+                Keybographer.analyze();
             }
+        },
+
+        analyze: function() {
+            Keybographer.report();
         },
 
         report: function(){
@@ -208,9 +210,9 @@ function main() {
     			$('keyboDetail').style.display = $('keyboDetail').style.display === 'none' ? 'block' : 'none';
     		}
     		
-            Keybographer.status("Чистовая скорость: <b>" + cleanSpeed.toFixed(2) + '</b> зн./мин&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' +
-    			'<button id = "keyboAnalysisButton" onclick="(' + toggleAnalysis + ')()">Анализ кейбограммы</button> ' +
-    			'<button id = "keyboDetailButton" onclick="(' + toggleKeyboDetail + ')()">Подробная кейбограмма</button><br/>');
+            Keybographer.status("Clean speed: <b>" + cleanSpeed.toFixed(2) + '</b> cpm&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' +
+    			'<button id = "keyboAnalysisButton" onclick="(' + toggleAnalysis + ')()">Keybogram analysis</button> ' +
+    			'<button id = "keyboDetailButton" onclick="(' + toggleKeyboDetail + ')()">Detailed keybogram</button><br/>');
 
 
             // Showing report
@@ -285,10 +287,10 @@ function main() {
         	}
         },
     }
-
     Keybographer.initialize();
 }
 
 var script = document.createElement("script");
-script.innerHTML = "(" + main + ")()";
+script.id = 'keybographerScript'
+script.innerHTML = "(" + mainK + ")()";
 document.body.appendChild(script);
