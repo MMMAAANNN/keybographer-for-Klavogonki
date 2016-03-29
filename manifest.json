@@ -9,6 +9,6 @@
     "description" : "This extension records, analyzes and visualizes the keybogram - a sequence of typing events", 
     "name" : "Keybographer", 
     "permissions" : [ "http://klavogonki.ru/*", "unlimitedStorage"],
-    "version" : "0.0.7.3",
+    "version" : "0.0.7.4",
     "manifest_version" : 2
 }

@@ -4,7 +4,7 @@
 // @description A script to record, analyze and present the keybogarm of a Klavogonki race.
 // @author MMMAAANNN
 // @license 
-// @version 0.0.7.3
+// @version 0.0.7.4
 // @include http://klavogonki.ru/g/*
 // @run-at      document-end
 // ==/UserScript==
@@ -49,7 +49,7 @@ function mainK() {
             keyboTable.setAttribute('border', '1px');
             keyboDetail.appendChild(keyboTable);
 
-            game.lag = false;
+            Keybographer.lag = false;
             this.record();
         },
 
@@ -65,8 +65,8 @@ function mainK() {
 
         eventRecorder: function(event) {
             Keybographer.status('Recording event no. ' + (Keybographer.keybogram.length + 1));
-            if (event.type === 'keypress' && !game.lag) {
-                game.lag = (new Date).getTime() - game.begintime;
+            if (event.type === 'keypress' && !Keybographer.lag) {
+                Keybographer.lag = (new Date).getTime() - game.begintime;
         	}
 	        event.game = {
                                 status: game.gamestatus,
@@ -216,7 +216,7 @@ function mainK() {
 
 
             // Showing report
-        	report  = 'Start lag: '       + game.lag                               + ' ms<br/>';
+        	report  = 'Start lag: '       + Keybographer.lag                               + ' ms<br/>';
             report += 'Total time: '      + (totalTime/1000).toFixed(3)            + ' s<br/>';
         	report += 'Correction loss: ' + (correctionLossTime/1000).toFixed(3)   + ' s<br/>';
         	report += 'Series of correctons: ' + correctionSeriesCounter		   + '<br/>';
@@ -258,7 +258,7 @@ function mainK() {
     						 ev.shiftKey ? 'Shift' : '',
     						 ev.ctrlKey  ? 'Ctrl'  : '',
     						 ev.altKey   ? 'Alt'   : '',
-    						(ev.timeStamp - Keybographer.keybogram[1].timeStamp + game.lag).toFixed(3),
+    						(ev.timeStamp - Keybographer.keybogram[1].timeStamp + Keybographer.lag).toFixed(3),
     						k ? (ev.timeStamp - Keybographer.keybogram[k-1].timeStamp).toFixed(3) : 'N/A',
     						 ev.game.error ? "ERROR" : " ",
     						 ev.isDeleted ? 'DELETED' : '',
