@@ -4,7 +4,7 @@
 // @description A script to record, analyze and present the keybogarm of a Klavogonki race.
 // @author MMMAAANNN
 // @license 
-// @version 0.0.7.2
+// @version 0.0.7.3
 // @include http://klavogonki.ru/g/*
 // @run-at      document-end
 // ==/UserScript==
