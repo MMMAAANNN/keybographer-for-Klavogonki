@@ -3,9 +3,9 @@
 // @namespace   klavogonki
 // @description A script to record, analyze and present the keybogarm of a Klavogonki race.
 // @author MMMAAANNN
-// @license 
+// @license https://creativecommons.org/licenses/by-sa/4.0/
 // @grant none
-// @version 0.0.7.9
+// @version 0.0.8.0
 // @include http://klavogonki.ru/g/*
 // @run-at      document-end
 // ==/UserScript==
@@ -140,72 +140,67 @@ function mainK() {
         },
 
         analyze: function() {
-            // A part of what is now in 'Keybographer.report()' must be moved up here,
-            // with the result as an object containing multiple calculated parameters.
-            Keybographer.report();
-        },
 
-        report: function(){
-            // A big part of this bloated function must be moved to .analyze().
-            // This function will ultimately only receive the paramenters and
-            // present them in an easily readable way to the user, without any calculations.
+            Keybographer.keydowns = Keybographer.keybogram.filter(function(downSeeker) {
+                return downSeeker.type === "keydown";
+            });
 
-        	var keydowns = Keybographer.keybogram.filter(function(downSeeker) {
-        		return downSeeker.type === "keydown";
-        	});
-
-        	var keypresses = Keybographer.keybogram.filter(function(pressSeeker) {
-        		return pressSeeker.type === "keypress";
-        	});
+            Keybographer.keypresses = Keybographer.keybogram.filter(function(pressSeeker) {
+                return pressSeeker.type === "keypress";
+            });
 
             // This is the totalTime algorithm used in TypingStatistics.
             // It does not account for preceding keydown of a Shift.
             // This is why 'keypresses' are used.
-        	var totalTime = keypresses[keypresses.length - 1].timeStamp - keypresses[0].timeStamp;
+            Keybographer.totalTime = Keybographer.keypresses[Keybographer.keypresses.length - 1].timeStamp -
+                            Keybographer.keypresses[0].timeStamp;
 
-        	// This is buggy, needs attention.
-        	var errorTime = 0;
-        	for (var eventCounter = 1; eventCounter < Keybographer.keybogram.length; eventCounter++) {
-        		if (Keybographer.keybogram[eventCounter].game.error && !Keybographer.keybogram[eventCounter - 1].game.error) {
-        			errorTime -= Keybographer.keybogram[eventCounter - 1].timeStamp;
-        		}
-        		if (!Keybographer.keybogram[eventCounter].game.error && Keybographer.keybogram[eventCounter - 1].game.error) {
-        			errorTime += Keybographer.keybogram[eventCounter - 1].timeStamp;
-        		}
-        	}
+            // This is buggy, needs attention.
+            Keybographer.errorTime = 0;
+            for (var eventCounter = 1; eventCounter < Keybographer.keybogram.length; eventCounter++) {
+                if (Keybographer.keybogram[eventCounter].game.error && !Keybographer.keybogram[eventCounter - 1].game.error) {
+                    Keybographer.errorTime -= Keybographer.keybogram[eventCounter - 1].timeStamp;
+                }
+                if (!Keybographer.keybogram[eventCounter].game.error && Keybographer.keybogram[eventCounter - 1].game.error) {
+                    Keybographer.errorTime += Keybographer.keybogram[eventCounter - 1].timeStamp;
+                }
+            }
 
-        	// This is exactly how brutto* is calculated in Typing Statistics.
-        	// It completely removes everything related to the correction,
-        	// including the normal keypress preceding it
-        	// (probably because the pause after it is not representative).
-        	var correctionLossTime = 0;
-        	var correctionSeriesCounter = 0;
-        	for (var eventCounter = 0; eventCounter < keypresses.length; eventCounter++) {
-        		var thisDeleted = keypresses[eventCounter].isDeleted;
-        		var previousDeleted;
-        		if (eventCounter === 0) {
-        			previousDeleted = false;
-        		} else {
-        			previousDeleted = keypresses[eventCounter - 1].isDeleted;
-        		}
-        		if (thisDeleted && !previousDeleted) {
-        			correctionLossTime -= keypresses[eventCounter].timeStamp;
-        			if (eventCounter > 0) {
-        				correctionLossTime += keypresses[eventCounter].timeStamp -
-                                              keypresses[eventCounter-1].timeStamp;
-        			}
-        			correctionSeriesCounter++;
-        		}
-        		if (!thisDeleted && previousDeleted) {
-        			correctionLossTime += keypresses[eventCounter].timeStamp;
-        		}
-        	}
+            // This is exactly how brutto* is calculated in Typing Statistics.
+            // It completely removes everything related to the correction,
+            // including the normal keypress preceding it
+            // (probably because the pause after it is not representative).
+            Keybographer.correctionLossTime = 0;
+            Keybographer.correctionSeriesCounter = 0;
+            for (var eventCounter = 0; eventCounter < Keybographer.keypresses.length; eventCounter++) {
+                var thisDeleted = Keybographer.keypresses[eventCounter].isDeleted;
+                var previousDeleted;
+                if (eventCounter === 0) {
+                    previousDeleted = false;
+                } else {
+                    previousDeleted = Keybographer.keypresses[eventCounter - 1].isDeleted;
+                }
+                if (thisDeleted && !previousDeleted) {
+                    Keybographer.correctionLossTime -= Keybographer.keypresses[eventCounter].timeStamp;
+                    if (eventCounter > 0) {
+                        Keybographer.correctionLossTime += Keybographer.keypresses[eventCounter].timeStamp -
+                                              Keybographer.keypresses[eventCounter-1].timeStamp;
+                    }
+                    Keybographer.correctionSeriesCounter++;
+                }
+                if (!thisDeleted && previousDeleted) {
+                    Keybographer.correctionLossTime += Keybographer.keypresses[eventCounter].timeStamp;
+                }
+            }
 
-        	var typedTextLength = game.input_words.join(' ').replace(/\s+/g, ' ').length + game.last_correct_char + 1;
-            var netSpeed = 60000 * typedTextLength / totalTime;
-            var cleanSpeed = 60000 * (typedTextLength - correctionSeriesCounter) /
-            						 (totalTime - correctionLossTime);
+            Keybographer.typedTextLength = game.input_words.join(' ').replace(/\s+/g, ' ').length + game.last_correct_char + 1;
+            Keybographer.netSpeed = 60000 * Keybographer.typedTextLength / Keybographer.totalTime;
+            Keybographer.cleanSpeed = 60000 * (Keybographer.typedTextLength - Keybographer.correctionSeriesCounter) /
+                                     (Keybographer.totalTime - Keybographer.correctionLossTime);
+            Keybographer.report();
+        },
 
+        report: function(){
             // Show clean speed at a visible spot
     		var toggleAnalysis = function() {
     			$('keyboAnalysis').style.display = $('keyboAnalysis').style.display === 'none' ? 'block' : 'none';
@@ -214,7 +209,7 @@ function mainK() {
     			$('keyboDetail').style.display = $('keyboDetail').style.display === 'none' ? 'block' : 'none';
     		};
     		
-            Keybographer.status("Clean speed: <b>" + cleanSpeed.toFixed(2) + '</b> cpm&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' +
+            Keybographer.status("Clean speed: <b>" + Keybographer.cleanSpeed.toFixed(2) + '</b> cpm&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' +
     			'<button id = "keyboAnalysisButton" onclick="(' + toggleAnalysis + ')()">Keybogram analysis</button> ' +
     			'<button id = "keyboDetailButton" onclick="(' + toggleKeyboDetail + ')()">Detailed keybogram</button><br/>');
 
@@ -222,16 +217,16 @@ function mainK() {
             // Showing report
             var report;
             report  = 'Start lag: '       + Keybographer.lag                               + ' ms<br/>';
-            report += 'Total time: '      + (totalTime/1000).toFixed(3)            + ' s<br/>';
-            report += 'Correction loss: ' + (correctionLossTime/1000).toFixed(3)   + ' s<br/>';
-            report += 'Series of correctons: ' + correctionSeriesCounter		   + '<br/>';
-            report += 'Error time: '      + (errorTime/1000).toFixed(3)            + ' s<br/>';
-            report += 'Net speed: '       + netSpeed.toFixed(2)                    + ' cpm<br/>';
-            report += 'Clean speed: <b>'  + cleanSpeed.toFixed(2)                  + '</b> cpm<br/>';
-            report += 'Typed text length: ' + typedTextLength           + ' characters<br/>';
-            report += 'Full text length: '  + game.text.length          + ' characters<br/>';
-            report += 'No. of keydowns: '   + keydowns.length           + ' events<br/>';
-            report += 'No. of keypresses: ' + keypresses.length         + ' events<br/>';
+            report += 'Total time: '      + (Keybographer.totalTime/1000).toFixed(3)            + ' s<br/>';
+            report += 'Correction loss: ' + (Keybographer.correctionLossTime/1000).toFixed(3)   + ' s<br/>';
+            report += 'Series of correctons: ' + Keybographer.correctionSeriesCounter		   + '<br/>';
+            report += 'Error time: '      + (Keybographer.errorTime/1000).toFixed(3)            + ' s<br/>';
+            report += 'Net speed: '       + Keybographer.netSpeed.toFixed(2)                    + ' cpm<br/>';
+            report += 'Clean speed: <b>'  + Keybographer.cleanSpeed.toFixed(2)                  + '</b> cpm<br/>';
+            report += 'Typed text length: ' + Keybographer.typedTextLength           + ' characters<br/>';
+            report += 'Full text length: '  + game.text.length                       + ' characters<br/>';
+            report += 'No. of keydowns: '   + Keybographer.keydowns.length           + ' events<br/>';
+            report += 'No. of keypresses: ' + Keybographer.keypresses.length         + ' events<br/>';
 
     		var analysis = document.createElement('div');
     		analysis.innerHTML = report;
