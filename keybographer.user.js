@@ -5,7 +5,7 @@
 // @author MMMAAANNN
 // @license 
 // @grant none
-// @version 0.0.7.8
+// @version 0.0.7.9
 // @include http://klavogonki.ru/g/*
 // @run-at      document-end
 // ==/UserScript==
@@ -22,11 +22,7 @@ function mainK() {
         interimReports: 0,
 
         status: function(message){
-            if (game.gamestatus != 'racing' || game.finished || Keybographer.verboseStatus) {
-                document.getElementById('keybographerStatus').innerHTML = message;
-            } else {
-                document.getElementById('keybographerStatus').innerHTML = '...';
-            }
+            document.getElementById('keybographerStatus').innerHTML = message;
         },
 
         initialize: function (){
@@ -71,7 +67,11 @@ function mainK() {
         },
 
         eventRecorder: function(event) {
-            Keybographer.status('Recording event no. ' + (Keybographer.keybogram.length + 1));
+            if (Keybographer.verboseStatus) {
+                Keybographer.status('Recording event no. ' + (Keybographer.keybogram.length + 1));
+            } else {
+                Keybographer.status('...');
+            }
             if (event.type === 'keypress' && !Keybographer.lag) {
                 Keybographer.lag = (new Date()).getTime() - game.begintime;
         	}
@@ -113,10 +113,12 @@ function mainK() {
                 }
             }
             Keybographer.keybogram.push(event);
-            Keybographer.status('Recorded event no. ' +
+            if (Keybographer.verboseStatus) {
+                Keybographer.status('Recorded event no. ' +
                                 (Keybographer.keybogram.length) + ": " +
                                 event.type + ' ' +
                                 (['focus', 'blur'].indexOf(event.type) === -1 ? event.code : ''));
+            }
         },
 
         initiateAnalysis: function () {
