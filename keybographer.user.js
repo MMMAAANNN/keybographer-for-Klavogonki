@@ -4,13 +4,15 @@
 // @description A script to record, analyze and present the keybogarm of a Klavogonki race.
 // @author MMMAAANNN
 // @license 
-// @version 0.0.7.5
+// @version 0.0.7.7
 // @include http://klavogonki.ru/g/*
 // @run-at      document-end
 // ==/UserScript==
 
 function mainK() {
-    Keybographer = {    
+    var Keybographer = {    
+
+        verboseStatus: false,
 
         keybogram: [],
 
@@ -19,7 +21,11 @@ function mainK() {
         interimReports: 0,
 
         status: function(message){
-            document.getElementById('keybographerStatus').innerHTML = message;
+            if (game.gamestatus != 'racing' || game.finished || Keybographer.verboseStatus) {
+                document.getElementById('keybographerStatus').innerHTML = message;
+            } else {
+                document.getElementById('keybographerStatus').innerHTML = '...';
+            }
         },
 
         initialize: function (){
@@ -66,7 +72,7 @@ function mainK() {
         eventRecorder: function(event) {
             Keybographer.status('Recording event no. ' + (Keybographer.keybogram.length + 1));
             if (event.type === 'keypress' && !Keybographer.lag) {
-                Keybographer.lag = (new Date).getTime() - game.begintime;
+                Keybographer.lag = (new Date()).getTime() - game.begintime;
         	}
 	        event.game = {
                                 status: game.gamestatus,
@@ -150,7 +156,8 @@ function mainK() {
         	});
 
             // This is the totalTime algorithm used in TypingStatistics.
-            // It does not account for preceding keydown of a Shift. This is why 'keypresses' are used.
+            // It does not account for preceding keydown of a Shift.
+            // This is why 'keypresses' are used.
         	var totalTime = keypresses[keypresses.length - 1].timeStamp - keypresses[0].timeStamp;
 
         	// This is buggy, needs attention.
@@ -181,26 +188,13 @@ function mainK() {
         		if (thisDeleted && !previousDeleted) {
         			correctionLossTime -= keypresses[eventCounter].timeStamp;
         			if (eventCounter > 0) {
-        				correctionLossTime += keypresses[eventCounter].timeStamp - keypresses[eventCounter-1].timeStamp;
+        				correctionLossTime += keypresses[eventCounter].timeStamp -
+                                              keypresses[eventCounter-1].timeStamp;
         			}
-        			console.log('Detected start of a correction at keypress no.', eventCounter,
-        						'Timestamp:', keypresses[eventCounter].timeStamp,
-        						'Current sum of correction loss:', (correctionLossTime/1000).toFixed(3));
         			correctionSeriesCounter++;
         		}
         		if (!thisDeleted && previousDeleted) {
         			correctionLossTime += keypresses[eventCounter].timeStamp;
-    	    		console.log('Detected end of a correction at keypress no.', eventCounter,
-    							'Timestamp:', keypresses[eventCounter].timeStamp,
-    							'Current sum of correction loss:', (correctionLossTime/1000).toFixed(3));
-        		}keypresses[eventCounter].isDeleted;
-        		var previousDeleted;
-        		if (eventCounter === 0) {
-        			previousDeleted = false;
-        		} else if (keypresses[eventCounter - 1].isDeleted) {
-        			previousDeleted = true;
-        		} else {
-        			previousDeleted = false;
         		}
         	}
 
@@ -212,10 +206,10 @@ function mainK() {
             // Show clean speed at a visible spot
     		var toggleAnalysis = function() {
     			$('keyboAnalysis').style.display = $('keyboAnalysis').style.display === 'none' ? 'block' : 'none';
-    		}
+    		};
     		var toggleKeyboDetail = function() {
     			$('keyboDetail').style.display = $('keyboDetail').style.display === 'none' ? 'block' : 'none';
-    		}
+    		};
     		
             Keybographer.status("Clean speed: <b>" + cleanSpeed.toFixed(2) + '</b> cpm&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' +
     			'<button id = "keyboAnalysisButton" onclick="(' + toggleAnalysis + ')()">Keybogram analysis</button> ' +
@@ -223,24 +217,25 @@ function mainK() {
 
 
             // Showing report
-        	report  = 'Start lag: '       + Keybographer.lag                               + ' ms<br/>';
+            var report;
+            report  = 'Start lag: '       + Keybographer.lag                               + ' ms<br/>';
             report += 'Total time: '      + (totalTime/1000).toFixed(3)            + ' s<br/>';
-        	report += 'Correction loss: ' + (correctionLossTime/1000).toFixed(3)   + ' s<br/>';
-        	report += 'Series of correctons: ' + correctionSeriesCounter		   + '<br/>';
-        	report += 'Error time: '      + (errorTime/1000).toFixed(3)            + ' s<br/>';
-    		report += 'Net speed: '       + netSpeed.toFixed(2)                    + ' cpm<br/>';
-        	report += 'Clean speed: <b>'  + cleanSpeed.toFixed(2)                  + '</b> cpm<br/>';
-        	report += 'Typed text length: ' + typedTextLength           + ' characters<br/>';
-        	report += 'Full text length: '  + game.text.length          + ' characters<br/>';
-        	report += 'No. of keydowns: '   + keydowns.length           + ' events<br/>';
-        	report += 'No. of keypresses: ' + keypresses.length         + ' events<br/>';
+            report += 'Correction loss: ' + (correctionLossTime/1000).toFixed(3)   + ' s<br/>';
+            report += 'Series of correctons: ' + correctionSeriesCounter		   + '<br/>';
+            report += 'Error time: '      + (errorTime/1000).toFixed(3)            + ' s<br/>';
+            report += 'Net speed: '       + netSpeed.toFixed(2)                    + ' cpm<br/>';
+            report += 'Clean speed: <b>'  + cleanSpeed.toFixed(2)                  + '</b> cpm<br/>';
+            report += 'Typed text length: ' + typedTextLength           + ' characters<br/>';
+            report += 'Full text length: '  + game.text.length          + ' characters<br/>';
+            report += 'No. of keydowns: '   + keydowns.length           + ' events<br/>';
+            report += 'No. of keypresses: ' + keypresses.length         + ' events<br/>';
 
     		var analysis = document.createElement('div');
     		analysis.innerHTML = report;
     		document.getElementById('keyboAnalysis').appendChild(analysis);
     		
     		// Showing detailed keybogram
-    		tableHeader = document.createElement('tr');
+    		var tableHeader = document.createElement('tr');
     		tableHeader.innerHTML = '<th>Index</th>' + 
     								'<th>Type</th>' + 
     								'<th>Key</th>' + 								
@@ -269,7 +264,7 @@ function mainK() {
     						k ? (ev.timeStamp - Keybographer.keybogram[k-1].timeStamp).toFixed(3) : 'N/A',
     						 ev.game.error ? "ERROR" : " ",
     						 ev.isDeleted ? 'DELETED' : '',
-    						 ev.game.inputStatus.replace(' ', '&middot;')]
+    						 ev.game.inputStatus.replace(' ', '&middot;')];
     	        var printLine = document.createElement('tr');
     	        var style = '';
     	        if (ev.type === 'keyup') {
@@ -292,18 +287,18 @@ function mainK() {
                 }
     	        printLine.style = style;
     	        for (var i = 0; i < line.length; i++) {
-    	        	printCell = document.createElement('td');
+    	        	var printCell = document.createElement('td');
     	        	printCell.innerHTML = line[i];
     	        	printLine.appendChild(printCell);
     	        }
             	document.getElementById('keyboTable').appendChild(printLine);
         	}
         },
-    }
+    };
     Keybographer.initialize();
 }
 
 var script = document.createElement("script");
-script.id = 'keybographerScript'
+script.id = 'keybographerScript';
 script.innerHTML = "(" + mainK + ")()";
 document.body.appendChild(script);
