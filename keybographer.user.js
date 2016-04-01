@@ -5,13 +5,13 @@
 // @author MMMAAANNN
 // @license https://creativecommons.org/licenses/by-sa/4.0/
 // @grant none
-// @version 0.0.8.0
+// @version 0.0.8.2
 // @include http://klavogonki.ru/g/*
 // @run-at      document-end
 // ==/UserScript==
 
 function mainK() {
-    var Keybographer = {    
+    Keybographer = {    
 
         verboseStatus: false,
 
@@ -84,7 +84,7 @@ function mainK() {
             // Known issue: does not handle situations like "b.8" well for Ctrl+BS.
             // Known issue: any characters outside standard Russian and English charsets.
             event.isDeleted = false;
-            if (event.code === 'Backspace' && event.type === 'keydown') {
+            if ((event.code === 'Backspace' || event.keyCode === 8) && event.type === 'keydown') {
                 var backwardsSeeker = Keybographer.keybogram.length - 2;
                 var deletedChars = '';
                 while (backwardsSeeker > -1) {
@@ -236,8 +236,9 @@ function mainK() {
     		var tableHeader = document.createElement('tr');
     		tableHeader.innerHTML = '<th>Index</th>' + 
     								'<th>Type</th>' + 
-    								'<th>Key</th>' + 								
-    								'<th>Code</th>' +
+                                    '<th>.code</th>' +                              
+                                    '<th>.keyCode</th>' +                              
+    								'<th>.charCode</th>' +
     								'<th>Char</th>' +
     								'<th>Shift</th>' + 
     								'<th>Ctrl</th>' + 
@@ -253,6 +254,7 @@ function mainK() {
     			var line = [ k,
     						 ev.type,
     						 ev.code,
+                             ev.keyCode,
     						 ev.charCode,
     						 ev.charCode === 32 ? '[ ]' : String.fromCharCode(ev.charCode),
     						 ev.shiftKey ? 'Shift' : '',
@@ -277,7 +279,7 @@ function mainK() {
                 if (ev.game.error) {
                     style += ' background: #ff9999';
                 }
-                if (ev.code === 'Backspace' && ev.type === 'keydown') {
+                if ((ev.code === 'Backspace' || ev.keyCode === 8) && ev.type === 'keydown') {
                     style = 'background: #cccccc;';
                     if (ev.ctrlKey) {
                         style = 'background: #999999;';
