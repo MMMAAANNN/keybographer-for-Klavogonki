@@ -5,7 +5,7 @@
 // @author MMMAAANNN
 // @license https://creativecommons.org/licenses/by-sa/4.0/
 // @grant none
-// @version 0.0.8.2
+// @version 0.0.8.3
 // @include http://klavogonki.ru/g/*
 // @run-at      document-end
 // ==/UserScript==
@@ -58,11 +58,11 @@ function mainK() {
 
         record: function () {
             this.status('Keybographer is waiting for the start of the race...');
-            this.watchedTarget.addEventListener('keydown', this.eventRecorder, true);
+            this.watchedTarget.addEventListener('keydown',  this.eventRecorder, true);
             this.watchedTarget.addEventListener('keypress', this.eventRecorder, true);
-            this.watchedTarget.addEventListener('keyup', this.eventRecorder, true);
-            this.watchedTarget.addEventListener('focus', this.eventRecorder, true);
-            this.watchedTarget.addEventListener('blur', this.eventRecorder, true);
+            this.watchedTarget.addEventListener('keyup',    this.eventRecorder, true);
+            this.watchedTarget.addEventListener('focus',    this.eventRecorder, true);
+            this.watchedTarget.addEventListener('blur',     this.eventRecorder, true);
             this.timer = setInterval(Keybographer.initiateAnalysis, 500);
         },
 
@@ -209,24 +209,72 @@ function mainK() {
     			$('keyboDetail').style.display = $('keyboDetail').style.display === 'none' ? 'block' : 'none';
     		};
     		
-            Keybographer.status("Clean speed: <b>" + Keybographer.cleanSpeed.toFixed(2) + '</b> cpm&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' +
-    			'<button id = "keyboAnalysisButton" onclick="(' + toggleAnalysis + ')()">Keybogram analysis</button> ' +
-    			'<button id = "keyboDetailButton" onclick="(' + toggleKeyboDetail + ')()">Detailed keybogram</button><br/>');
+            var playerID = '';
+            for (var playerIndex = 0; playerIndex < game.players.length; playerIndex++) {
+                if (game.players[playerIndex].you) {
+                    playerInfo = game.players[playerIndex].info.user;
+                    if (playerInfo === null) {
+                        playerInfo.id = 'Guest';
+                    }
+                    break;
+                }
+            }
+            var flattenKeybogram = function(keybogram){
+                var output = [];
+                for (var eventIndex = 0; eventIndex < keybogram.length; eventIndex++) {
+                    var flatEvent = {};
+                    for (var key in keybogram[eventIndex]) {
+                        var exclusions = "view path sourceCapabilities target currentTarget srcElement " +
+                                         "returnValue bubble cancelable defaultPrevented cancelBubble eventPhase " +
+                                         "NONE CAPTURING_PHASE AT_TARGET BUBBLING_PHASE " +
+                                         "MOUSEDOWN MOUSEUP MOUSEOVER MOUSEOUT MOUSEMOVE MOUSEDRAG CLICK DBLCLICK " +
+                                         "KEYDOWN KEYUP KEYPRESS DRAGDROP FOCUS BLUR SELECT CHANGE " +
+                                         "DOM_KEY_LOCATION_STANDARD DOM_KEY_LOCATION_LEFT DOM_KEY_LOCATION_RIGHT " +
+                                         "DOM_KEY_LOCATION_NUMPAD"
+                        if (exclusions.indexOf(key) === -1){
+                            flatEvent[key] = keybogram[eventIndex][key];
+                        }
+                    }
+                    output.push(flatEvent);
+                }
+                return output;
+            };
+            var jsonKeybogram = JSON.stringify({KeybogramFormatVersion: "0.1",
+                                                Browser: navigator.userAgent,
+                                                Platform: navigator.platform,
+                                                KlavogonkiPlayerInfo: playerInfo,
+                                                GameID: game.id,
+                                                GameParams: game.params,
+                                                GameTextInfo: game.textinfo,
+                                                GameBeginTimeServer: game.begintimeServer*1000,
+                                                GameBeginTimeDelayed: game.begintime_delayed,
+                                                StartLag: Keybographer.lag,
+                                                Keybogram: flattenKeybogram(Keybographer.keybogram)}, null, 4);
+            var filename = 'keybogram-' + playerInfo.id + '_' + game.params.gametype + '_'+ game.begintimeServer*1000 + '.json';
+      
+            Keybographer.status("Clean speed: <b>" + Keybographer.cleanSpeed.toFixed(2) + '</b> cpm ' +
+                '<a href = "data:text/json;charset=utf-8,' + encodeURIComponent(jsonKeybogram) + '" download = "' + filename + '">[Save]</a> ' +
+    			'<button id = "keyboAnalysisButton" onclick="(' + toggleAnalysis + ')()">Analysis</button> ' +
+    			'<button id = "keyboDetailButton" onclick="(' + toggleKeyboDetail + ')()">Details</button><br/>');
 
 
             // Showing report
             var report;
             report  = 'Start lag: '       + Keybographer.lag                               + ' ms<br/>';
             report += 'Total time: '      + (Keybographer.totalTime/1000).toFixed(3)            + ' s<br/>';
+            report += '<br/>';
+            report += 'Series of correctons: ' + Keybographer.correctionSeriesCounter          + '<br/>';
             report += 'Correction loss: ' + (Keybographer.correctionLossTime/1000).toFixed(3)   + ' s<br/>';
-            report += 'Series of correctons: ' + Keybographer.correctionSeriesCounter		   + '<br/>';
             report += 'Error time: '      + (Keybographer.errorTime/1000).toFixed(3)            + ' s<br/>';
+            report += '<br/>';
             report += 'Net speed: '       + Keybographer.netSpeed.toFixed(2)                    + ' cpm<br/>';
             report += 'Clean speed: <b>'  + Keybographer.cleanSpeed.toFixed(2)                  + '</b> cpm<br/>';
-            report += 'Typed text length: ' + Keybographer.typedTextLength           + ' characters<br/>';
+            report += '<br/>';
             report += 'Full text length: '  + game.text.length                       + ' characters<br/>';
+            report += 'Typed text length: ' + Keybographer.typedTextLength           + ' characters<br/>';
             report += 'No. of keydowns: '   + Keybographer.keydowns.length           + ' events<br/>';
             report += 'No. of keypresses: ' + Keybographer.keypresses.length         + ' events<br/>';
+            report += '<br/>';
 
     		var analysis = document.createElement('div');
     		analysis.innerHTML = report;
