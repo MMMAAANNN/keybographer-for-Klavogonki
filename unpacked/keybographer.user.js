@@ -5,7 +5,7 @@
 // @author MMMAAANNN
 // @license https://creativecommons.org/licenses/by-sa/4.0/
 // @grant none
-// @version 0.0.8.3
+// @version 0.0.8.4
 // @include http://klavogonki.ru/g/*
 // @run-at      document-end
 // ==/UserScript==
@@ -209,6 +209,7 @@ function mainK() {
     			$('keyboDetail').style.display = $('keyboDetail').style.display === 'none' ? 'block' : 'none';
     		};
     		
+            // Export to JSON
             var playerID = '';
             for (var playerIndex = 0; playerIndex < game.players.length; playerIndex++) {
                 if (game.players[playerIndex].you) {
@@ -250,10 +251,17 @@ function mainK() {
                                                 GameBeginTimeDelayed: game.begintime_delayed,
                                                 StartLag: Keybographer.lag,
                                                 Keybogram: flattenKeybogram(Keybographer.keybogram)}, null, 4);
-            var filename = 'keybogram-' + playerInfo.id + '_' + game.params.gametype + '_'+ game.begintimeServer*1000 + '.json';
-      
+            var data = 'data:text/json;charset=utf-8,' + encodeURIComponent(jsonKeybogram);
+            var filename = ['keybogram',
+                            playerInfo.id,
+                            game.params.gametype,
+                            game.begintimeServer*1000,
+                            '.json'].join('_');
+            //END OF EXPORT TO JSON
+
+            // Showing clean speed and controls
             Keybographer.status("Clean speed: <b>" + Keybographer.cleanSpeed.toFixed(2) + '</b> cpm ' +
-                '<a href = "data:text/json;charset=utf-8,' + encodeURIComponent(jsonKeybogram) + '" download = "' + filename + '">[Save]</a> ' +
+                '<a href = "' + data +  '" download = "' + filename + '">[Save]</a> ' +
     			'<button id = "keyboAnalysisButton" onclick="(' + toggleAnalysis + ')()">Analysis</button> ' +
     			'<button id = "keyboDetailButton" onclick="(' + toggleKeyboDetail + ')()">Details</button><br/>');
 
